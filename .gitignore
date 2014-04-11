@@ -1,0 +1,7 @@
+/.idea/
+*.iml
+/static/
+db.sqlite3
+/node_modules/
+/bower_components/
+*.pyc

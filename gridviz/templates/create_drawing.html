@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load bootstrap %}
+
+{% block content %}
+<div id="create-drawing">
+    <h2>New Drawing</h2>
+    <form action="/drawings/create" method="post" class="form-horizontal">{% csrf_token %}
+        {{ form|bootstrap_horizontal }}
+        <a href="/drawings/" class="cancel-button">Cancel</a>
+        <input type="submit" class="create-button" value="Create">
+    </form>
+</div>
+{% endblock %}
