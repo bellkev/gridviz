@@ -59,8 +59,16 @@ class CreateDrawingTests(TestCase):
     def test_create(self):
         self.client.post('/drawings/create', {'title': 'a'})
         new_drawing = Drawing.objects.first()
-        self.assertEquals(new_drawing.title, 'a')
+        self.assertEqual(new_drawing.title, 'a')
 
     def test_no_title(self):
         response = self.client.post('/drawings/create', {'title': ''})
         self.assertContains(response, 'This field is required.')
+
+
+class DrawingDetailTests(TestCase):
+
+    def test_rename(self):
+        new_drawing = Drawing.objects.create(title='abc')
+        self.client.post('/drawings/' + str(new_drawing.pk), {'title': 'def'})
+        self.assertEqual(Drawing.objects.get(pk=new_drawing.pk).title, 'def')

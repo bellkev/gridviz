@@ -1,4 +1,4 @@
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, CreateView, UpdateView
 from django.forms.models import modelform_factory
 
 from .models import Drawing
@@ -18,8 +18,9 @@ class CreateDrawing(CreateView):
 create_drawing = CreateDrawing.as_view()
 
 
-class DrawingDetail(DetailView):
-    template_name = 'drawing_detail.html'
+class DrawingDetail(UpdateView):
     model = Drawing
+    template_name = 'drawing_detail.html'
+    form_class = modelform_factory(Drawing, fields=['title'])
 
 drawing_detail = DrawingDetail.as_view()
