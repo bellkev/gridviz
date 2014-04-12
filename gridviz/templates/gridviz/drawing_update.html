@@ -15,14 +15,16 @@
             </div>
             <div class="row">
                 <div class="col">
-                    <a class="back-button" href="{% url 'gridviz.views.drawing_list' %}">All Drawings</a>
+                    <a class="back-button" href="{% url 'gridviz.views.drawing_list' %}">
+                        <span class="back-icon"></span> All Drawings</a>
                 </div>
                 <div class="col">
                     <a class="delete-button"
                        href="{% url 'gridviz.views.drawing_confirm_delete' pk=form.instance.pk %}">Delete Drawing</a>
                 </div>
                 <div class="col">
-                    <a class="action-button" href="{% url 'gridviz.views.drawing_edit' pk=object.pk %}">Edit Drawing</a>
+                    <a class="action-button" href="{% url 'gridviz.views.drawing_edit' pk=object.pk %}">
+                        <span class="edit-icon"></span> Edit Drawing</a>
                 </div>
             </div>
         </form>
