@@ -1,26 +1,25 @@
 from django.views.generic import ListView, CreateView, UpdateView
-from django.forms.models import modelform_factory
 
 from .models import Drawing
 
 
-class Drawings(ListView):
-    template_name = 'drawings.html'
-    queryset = Drawing.objects.order_by('-created_at')
-
-drawings = Drawings.as_view()
-
-
-class CreateDrawing(CreateView):
-    template_name = 'create_drawing.html'
-    form_class = modelform_factory(Drawing, fields=['title'])
-
-create_drawing = CreateDrawing.as_view()
-
-
-class DrawingDetail(UpdateView):
+class DrawingList(ListView):
     model = Drawing
-    template_name = 'drawing_detail.html'
-    form_class = modelform_factory(Drawing, fields=['title'])
 
-drawing_detail = DrawingDetail.as_view()
+drawings = DrawingList.as_view()
+
+
+class DrawingCreate(CreateView):
+    model = Drawing
+    fields = ['title']
+    template_name_suffix = '_create'
+
+create_drawing = DrawingCreate.as_view()
+
+
+class DrawingUpdate(UpdateView):
+    model = Drawing
+    fields = ['title']
+    template_name_suffix = '_update'
+
+drawing_detail = DrawingUpdate.as_view()
