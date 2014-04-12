@@ -35,7 +35,7 @@ class ProjectTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-class DrawingsTests(TestCase):
+class DrawingListTests(TestCase):
     """Test that drawings show up"""
     def test_one_drawing(self):
         Drawing.objects.create(title='1-title')
@@ -54,7 +54,7 @@ class DrawingsTests(TestCase):
         self.assertContains(response, 'You haven\'t made any drawings yet')
 
 
-class CreateDrawingTests(TestCase):
+class DrawingCreateTests(TestCase):
 
     def test_create(self):
         self.client.post('/drawings/create', {'title': 'a'})
@@ -66,7 +66,7 @@ class CreateDrawingTests(TestCase):
         self.assertContains(response, 'This field is required.')
 
 
-class DrawingDetailTests(TestCase):
+class DrawingUpdateTests(TestCase):
 
     def test_rename(self):
         new_drawing = Drawing.objects.create(title='abc')
