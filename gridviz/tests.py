@@ -72,3 +72,11 @@ class DrawingUpdateTests(TestCase):
         new_drawing = Drawing.objects.create(title='abc')
         self.client.post('/drawings/' + str(new_drawing.pk), {'title': 'def'})
         self.assertEqual(Drawing.objects.get(pk=new_drawing.pk).title, 'def')
+
+
+class DrawingDeleteTests(TestCase):
+
+    def test_delete(self):
+        new_drawing = Drawing.objects.create(title='abc')
+        self.client.post(new_drawing.get_absolute_url() + '/delete')
+        self.assertRaises(Drawing.DoesNotExist, Drawing.objects.get, pk=new_drawing.pk)

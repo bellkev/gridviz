@@ -2,11 +2,22 @@
 {% load bootstrap %}
 
 {% block content %}
-    <div id="drawing-detail">
-        <form class="form-horizontal" method="post" action="{{ form.instance.get_absolute_url }}">{% csrf_token %}
+    <div id="drawing-update">
+        <div class="content-title">{{ object.title }}</div>
+        <form class="form-horizontal" method="post">{% csrf_token %}
             {{ form|bootstrap_horizontal }}
-            <a class="back-button" href="/drawings/">Back to Drawings</a>
-            <input type="submit" class="save-button" value="Save">
+            <div class="row">
+                <div class="col">
+                    <a class="back-button" href="/drawings/">Back to Drawings</a>
+                </div>
+                <div class="col">
+                    <a class="delete-button"
+                       href="{% url 'gridviz.views.drawing_confirm_delete' pk=form.instance.pk %}">Delete this Drawing</a>
+                </div>
+                <div class="col">
+                    <input type="submit" class="submit-button" value="Save">
+                </div>
+            </div>
         </form>
     </div>
 {% endblock %}

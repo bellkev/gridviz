@@ -1,10 +1,11 @@
 {% extends "gridviz/base.html" %}
 
 {% block content %}
-    <div id="drawings">
-        <h2>My Drawings
-            <a href="/drawings/create" class="create-button"><span class="plus-icon"></span> New Drawing</a>
-        </h2>
+    <div id="drawing-list">
+        <div class="content-title">My Drawings
+            <a id="new-drawing" href="/drawings/create" class="submit-button">
+                <span class="plus-icon"></span> New Drawing</a>
+        </div>
         <table class="drawings-table">
             <thead>
             <tr>

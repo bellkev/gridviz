@@ -1,4 +1,5 @@
-from django.views.generic import ListView, CreateView, UpdateView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.core.urlresolvers import reverse_lazy
 
 from .models import Drawing
 
@@ -15,6 +16,13 @@ class DrawingCreate(CreateView):
     template_name_suffix = '_create'
 
 drawing_create = DrawingCreate.as_view()
+
+
+class DrawingDelete(DeleteView):
+    model = Drawing
+    success_url = reverse_lazy('gridviz.views.drawing_list')
+
+drawing_confirm_delete = DrawingDelete.as_view()
 
 
 class DrawingUpdate(UpdateView):
