@@ -6,7 +6,7 @@ from .models import Drawing
 class DrawingList(ListView):
     model = Drawing
 
-drawings = DrawingList.as_view()
+drawing_list = DrawingList.as_view()
 
 
 class DrawingCreate(CreateView):
@@ -14,7 +14,7 @@ class DrawingCreate(CreateView):
     fields = ['title']
     template_name_suffix = '_create'
 
-create_drawing = DrawingCreate.as_view()
+drawing_create = DrawingCreate.as_view()
 
 
 class DrawingUpdate(UpdateView):
@@ -22,4 +22,4 @@ class DrawingUpdate(UpdateView):
     fields = ['title']
     template_name_suffix = '_update'
 
-drawing_detail = DrawingUpdate.as_view()
+drawing_update = DrawingUpdate.as_view()

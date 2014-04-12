@@ -5,7 +5,7 @@ from gridviz import views
 
 urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^drawings/$', views.drawings),
-    url(r'^drawings/create$', views.create_drawing),
-    url(r'^drawings/(?P<pk>\d*)$', views.drawing_detail)
+    url(r'^drawings/$', views.drawing_list),
+    url(r'^drawings/create$', views.drawing_create),
+    url(r'^drawings/(?P<pk>\d*)$', views.drawing_update)
 )
