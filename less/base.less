@@ -1,0 +1,32 @@
+#base {
+  background-image: url("grid.png");
+
+  #global-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background-color: @content-color;
+
+    ul {
+      .container;
+    }
+
+    #logo {
+      font-size: 200%;
+    }
+
+    li {
+      list-style: none;
+      float: left;
+    }
+  }
+
+  #content-container {
+    max-width: 600px;
+    margin: 80px auto;
+    padding: 20px;
+    background-color: @content-color;
+  }
+}

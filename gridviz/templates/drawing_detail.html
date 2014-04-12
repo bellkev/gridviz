@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 
 {% block content %}
-    {{ drawing.pk }}
+    <div id="drawing-detail">
+        {{ drawing.pk }}
+        <a class="back-button" href="/drawings/">Back to Drawings</a>
+    </div>
 {% endblock %}
