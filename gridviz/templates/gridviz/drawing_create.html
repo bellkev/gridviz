@@ -7,7 +7,7 @@
     <form method="post" class="form-horizontal">{% csrf_token %}
         {{ form|bootstrap_horizontal }}
         <a href="/drawings/" class="cancel-button">Cancel</a>
-        <input type="submit" class="submit-button" value="Create">
+        <input type="submit" class="action-button" value="Create">
     </form>
 </div>
 {% endblock %}

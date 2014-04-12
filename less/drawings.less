@@ -24,17 +24,31 @@
 
 #drawing-update {
 
-    .back-button {
-        .pull-left;
+    #rename-button {
+        .pull-right;
+        .btn;
+        .btn-default;
     }
 
-    .submit-button {
-        .pull-right;
+    .form-col {
+        .make-sm-column(10);
+    }
+
+    .rename-col {
+        .make-sm-column(2);
     }
 
     .col {
         text-align: center;
         .make-sm-column(4);
+    }
+
+    .back-button {
+        .pull-left;
+    }
+
+    .action-button {
+        .pull-right;
     }
 }
 
@@ -45,8 +59,11 @@
 
     p {
         text-align: center;
-        color: @state-danger-text;
         margin: 30px;
         font-weight: bold;
+    }
+
+    .content-title, p {
+        color: @state-danger-text;
     }
 }

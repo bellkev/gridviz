@@ -1,4 +1,4 @@
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.core.urlresolvers import reverse_lazy
 
 from .models import Drawing
@@ -31,3 +31,10 @@ class DrawingUpdate(UpdateView):
     template_name_suffix = '_update'
 
 drawing_update = DrawingUpdate.as_view()
+
+
+class DrawingEdit(DetailView):
+    model = Drawing
+    template_name_suffix = '_edit'
+
+drawing_edit = DrawingEdit.as_view()

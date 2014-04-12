@@ -8,5 +8,6 @@ urlpatterns = patterns('',
     url(r'^drawings/$', views.drawing_list),
     url(r'^drawings/create$', views.drawing_create),
     url(r'^drawings/(?P<pk>\d*)$', views.drawing_update),
-    url(r'^drawings/(?P<pk>\d*)/delete$', views.drawing_confirm_delete)
+    url(r'^drawings/(?P<pk>\d*)/delete$', views.drawing_confirm_delete),
+    url(r'^drawings/(?P<pk>\d*)/edit', views.drawing_edit)
 )

@@ -5,17 +5,24 @@
     <div id="drawing-update">
         <div class="content-title">{{ object.title }}</div>
         <form class="form-horizontal" method="post">{% csrf_token %}
-            {{ form|bootstrap_horizontal }}
+            <div class="row">
+                <div class="form-col">
+                    {{ form|bootstrap_horizontal }}
+                </div>
+                <div class="rename-col">
+                    <input id="rename-button" type="submit" value="Rename">
+                </div>
+            </div>
             <div class="row">
                 <div class="col">
-                    <a class="back-button" href="/drawings/">Back to Drawings</a>
+                    <a class="back-button" href="{% url 'gridviz.views.drawing_list' %}">All Drawings</a>
                 </div>
                 <div class="col">
                     <a class="delete-button"
-                       href="{% url 'gridviz.views.drawing_confirm_delete' pk=form.instance.pk %}">Delete this Drawing</a>
+                       href="{% url 'gridviz.views.drawing_confirm_delete' pk=form.instance.pk %}">Delete Drawing</a>
                 </div>
                 <div class="col">
-                    <input type="submit" class="submit-button" value="Save">
+                    <a class="action-button" href="{% url 'gridviz.views.drawing_edit' pk=object.pk %}">Edit Drawing</a>
                 </div>
             </div>
         </form>

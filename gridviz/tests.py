@@ -20,7 +20,7 @@ class ProjectTests(TestCase):
         response = self.client.get('/drawings/')
         self.assertEqual(response.status_code, 200)
 
-    def test_drawing_detail(self):
+    def test_drawing_update(self):
         drawing = Drawing.objects.create(title='drawing title')
         response = self.client.get('/drawings/' + str(drawing.pk))
         self.assertEqual(response.status_code, 200)
@@ -32,6 +32,16 @@ class ProjectTests(TestCase):
 
     def test_create_drawing(self):
         response = self.client.get('/drawings/create')
+        self.assertEqual(response.status_code, 200)
+
+    def test_delete_drawing(self):
+        drawing = Drawing.objects.create(title='drawing title')
+        response = self.client.get(drawing.get_absolute_url() + '/delete')
+        self.assertEqual(response.status_code, 200)
+
+    def test_drawgin_edit(self):
+        drawing = Drawing.objects.create(title='drawing title')
+        response = self.client.get(drawing.get_absolute_url() + '/edit')
         self.assertEqual(response.status_code, 200)
 
 
