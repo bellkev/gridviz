@@ -12,3 +12,26 @@ class Drawing(models.Model):
 
     def get_absolute_url(self):
         return reverse('gridviz.views.drawing_update', kwargs={'pk': self.pk})
+
+
+class SvgElementType(models.Model):
+    name = models.CharField(max_length=20)
+
+
+class SvgElement(models.Model):
+    type = models.ForeignKey(SvgElementType)
+
+
+class SvgAttributeType(models.Model):
+    name = models.CharField(max_length=20)
+    data_type = models.PositiveSmallIntegerField()
+
+
+class Data(models.Model):
+    element = models.ForeignKey(SvgElement)
+    attribute_type = models.ForeignKey(SvgAttributeType)
+    data_type = models.PositiveSmallIntegerField()
+
+
+class LengthData(Data):
+    value = models.FloatField()

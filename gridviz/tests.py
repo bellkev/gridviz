@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from .models import Drawing
+from .models import Drawing, SvgAttribute, SvgElementType, SvgElement, SvgSchema
 
 
 class DrawingModelTest(TestCase):
@@ -12,6 +12,15 @@ class DrawingModelTest(TestCase):
     def test_get_absolute_url(self):
         drawing = Drawing.objects.create(title='My drawing title',)
         self.assertEqual(drawing.get_absolute_url(), '/drawings/' + str(drawing.pk))
+
+
+class SvgElementModelTest(TestCase):
+
+    def dummy_test(self):
+        rect_type = SvgElementType.objects.create(name='rect')
+        SvgSchema.objects.create(name='x', datatype=SvgSchema.TYPE_FLOAT)
+        e = SvgElement.objects.create(type=rect_type, x=12)
+        self.assertEqual(e.x, 12)
 
 
 class ProjectTests(TestCase):
