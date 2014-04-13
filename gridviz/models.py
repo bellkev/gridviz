@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.urlresolvers import reverse
+from model_utils.managers import InheritanceManager
 
 
 class Drawing(models.Model):
@@ -22,16 +23,15 @@ class SvgElement(models.Model):
     type = models.ForeignKey(SvgElementType)
 
 
-class SvgAttributeType(models.Model):
+class SvgAttribute(models.Model):
     name = models.CharField(max_length=20)
-    data_type = models.PositiveSmallIntegerField()
 
 
-class Data(models.Model):
-    element = models.ForeignKey(SvgElement)
-    attribute_type = models.ForeignKey(SvgAttributeType)
-    data_type = models.PositiveSmallIntegerField()
+class SvgDatumBase(models.Model):
+    element = models.ForeignKey(SvgElement, related_name='data')
+    attribute = models.ForeignKey(SvgAttribute)
+    objects = InheritanceManager()
 
 
-class LengthData(Data):
+class SvgLengthDatum(SvgDatumBase):
     value = models.FloatField()

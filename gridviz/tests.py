@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from .models import Drawing, SvgAttribute, SvgElementType, SvgElement, SvgSchema
+from .models import Drawing, SvgElementType, SvgElement, SvgAttribute, SvgDatumBase, SvgLengthDatum
 
 
 class DrawingModelTest(TestCase):
@@ -14,13 +14,19 @@ class DrawingModelTest(TestCase):
         self.assertEqual(drawing.get_absolute_url(), '/drawings/' + str(drawing.pk))
 
 
-class SvgElementModelTest(TestCase):
+class SvgDatumModelTestBase(TestCase):
 
-    def dummy_test(self):
-        rect_type = SvgElementType.objects.create(name='rect')
-        SvgSchema.objects.create(name='x', datatype=SvgSchema.TYPE_FLOAT)
-        e = SvgElement.objects.create(type=rect_type, x=12)
-        self.assertEqual(e.x, 12)
+    def setUp(self):
+        self.test_type = SvgElementType.objects.create(name='test_type')
+        self.test_attr = SvgAttribute.objects.create(name='test_attr')
+        self.test_element = SvgElement.objects.create(type=self.test_type)
+
+
+class SvgLengthDatumModelTest(SvgDatumModelTestBase):
+
+    def test_length(self):
+        SvgLengthDatum.objects.create(element=self.test_element, attribute=self.test_attr, value=12.5)
+        self.assertEqual(SvgElement.objects.first().data.first().svglengthdatum.value, 12.5)
 
 
 class ProjectTests(TestCase):
