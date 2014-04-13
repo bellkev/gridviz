@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from .models import Drawing, SvgElementType, SvgElement, SvgAttribute, SvgDatumBase, SvgLengthDatum
+from .models import Drawing, SvgElementType, SvgElement, SvgAttribute, SvgLengthDatum
 
 
 class DrawingModelTest(TestCase):
@@ -17,9 +17,10 @@ class DrawingModelTest(TestCase):
 class SvgDatumModelTestBase(TestCase):
 
     def setUp(self):
+        self.test_drawing = Drawing.objects.create(title='test_drawing')
         self.test_type = SvgElementType.objects.create(name='test_type')
         self.test_attr = SvgAttribute.objects.create(name='test_attr')
-        self.test_element = SvgElement.objects.create(type=self.test_type)
+        self.test_element = SvgElement.objects.create(type=self.test_type, drawing=self.test_drawing)
 
 
 class SvgLengthDatumModelTest(SvgDatumModelTestBase):

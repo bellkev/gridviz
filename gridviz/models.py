@@ -21,6 +21,7 @@ class SvgElementType(models.Model):
 
 class SvgElement(models.Model):
     type = models.ForeignKey(SvgElementType)
+    drawing = models.ForeignKey(Drawing)
 
 
 class SvgAttribute(models.Model):
