@@ -98,3 +98,14 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 # Websockets
 
 WEBSOCKET_URL = '/ws/'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'default'
+    },
+    'svg_names': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'svg_names'
+    }
+}

@@ -1,13 +1,17 @@
+import json
+
 from django.test import TestCase
+from gridviz import svg_data_types
 
 from .models import Drawing, SvgElementType, SvgElement, SvgAttribute, SvgLengthDatum
+from .messages import process_message
 
 
 class SvgTest(TestCase):
     def setUp(self):
         self.test_drawing = Drawing.objects.create(title='test_drawing')
         self.test_type = SvgElementType.objects.create(name='test_type')
-        self.test_attr = SvgAttribute.objects.create(name='test_attr')
+        self.test_attr = SvgAttribute.objects.create(name='test_attr', data_type=svg_data_types.LENGTH_TYPE)
         self.test_element = SvgElement.objects.create(type=self.test_type, drawing=self.test_drawing)
 
 
@@ -24,8 +28,8 @@ class DrawingModelTest(SvgTest):
         el1 = SvgElement.objects.create(type=self.test_type, drawing=self.test_drawing)
         el2 = SvgElement.objects.create(type=self.test_type, drawing=self.test_drawing)
         el3 = SvgElement.objects.create(type=self.test_type, drawing=self.test_drawing)
-        attr_1 = SvgAttribute.objects.create(name='attr_1')
-        attr_2 = SvgAttribute.objects.create(name='attr_2')
+        attr_1 = SvgAttribute.objects.create(name='attr_1', data_type=svg_data_types.LENGTH_TYPE)
+        attr_2 = SvgAttribute.objects.create(name='attr_2', data_type=svg_data_types.LENGTH_TYPE)
         SvgLengthDatum.objects.create(element=el1, attribute=self.test_attr, value=1)
         SvgLengthDatum.objects.create(element=el2, attribute=self.test_attr, value=2)
         SvgLengthDatum.objects.create(element=el3, attribute=attr_1, value=3)
@@ -39,8 +43,8 @@ class DrawingModelTest(SvgTest):
 
 class SvgElementModelTest(SvgTest):
     def test_get_attrs(self):
-        attr_1 = SvgAttribute.objects.create(name='attr_1')
-        attr_2 = SvgAttribute.objects.create(name='attr_2')
+        attr_1 = SvgAttribute.objects.create(name='attr_1', data_type=svg_data_types.LENGTH_TYPE)
+        attr_2 = SvgAttribute.objects.create(name='attr_2', data_type=svg_data_types.LENGTH_TYPE)
         SvgLengthDatum.objects.create(element=self.test_element, attribute=attr_1, value=1)
         SvgLengthDatum.objects.create(element=self.test_element, attribute=attr_2, value=2)
         with self.assertNumQueries(1):
@@ -126,3 +130,22 @@ class DrawingDeleteTests(TestCase):
         new_drawing = Drawing.objects.create(title='abc')
         self.client.post(new_drawing.get_absolute_url() + '/delete')
         self.assertRaises(Drawing.DoesNotExist, Drawing.objects.get, pk=new_drawing.pk)
+
+
+class MessageQueries(SvgTest):
+    def setUp(self):
+        super(MessageQueries, self).setUp()
+        self.test_message = json.dumps({'action': 'add_attr', 'element_id': self.test_element.pk,
+                                        'temp_id': 123, 'attr_name': 'test_attr', 'attr_value': 25})
+
+    def test_create(self):
+        result = process_message(self.test_drawing, self.test_message)
+        datum = SvgLengthDatum.objects.first()
+        expected = json.dumps({'action': 'add_attr', 'element_id': self.test_element.pk, 'temp_id': 123,
+                               'id': datum.pk, 'attr_name': 'test_attr', 'attr_value': 25})
+        self.assertEqual(SvgLengthDatum.objects.first().value, 25)
+        self.assertEqual(expected, result)
+
+    def test_drawing_filter(self):
+        with self.assertRaises(SvgElement.DoesNotExist):
+            process_message(Drawing.objects.create(title='foo'), self.test_message)

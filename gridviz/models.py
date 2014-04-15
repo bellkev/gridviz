@@ -2,6 +2,7 @@ from django.db import models
 from django.core.urlresolvers import reverse
 from django.db.models import Prefetch
 from model_utils.managers import InheritanceManager
+from gridviz import svg_data_types
 
 
 class Drawing(models.Model):
@@ -16,7 +17,7 @@ class Drawing(models.Model):
         return reverse('gridviz.views.drawing_update', kwargs={'pk': self.pk})
 
     def get_elements(self):
-        qs = self.svgelement_set.select_related('type')
+        qs = self.elements.select_related('type')
         pre_qs = SvgDatumBase.objects.select_related('attribute').select_subclasses()
 
         def attr_dict(data):
@@ -32,7 +33,7 @@ class SvgElementType(models.Model):
 
 class SvgElement(models.Model):
     type = models.ForeignKey(SvgElementType)
-    drawing = models.ForeignKey(Drawing)
+    drawing = models.ForeignKey(Drawing, related_name='elements')
 
     def get_attrs(self):
         # TODO: Investigate why the explicit field name reference is needed here
@@ -42,7 +43,7 @@ class SvgElement(models.Model):
 
 class SvgAttribute(models.Model):
     name = models.CharField(max_length=20)
-
+    data_type = models.PositiveSmallIntegerField()
 
 class SvgDatumBase(models.Model):
     element = models.ForeignKey(SvgElement, related_name='data')
@@ -51,4 +52,5 @@ class SvgDatumBase(models.Model):
 
 
 class SvgLengthDatum(SvgDatumBase):
+    data_type = svg_data_types.LENGTH_TYPE
     value = models.FloatField()
