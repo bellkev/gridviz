@@ -1,7 +1,10 @@
 {% extends "gridviz/base.html" %}
+{% load staticfiles %}
 
 {% block content %}
-    <div id="drawing-edit">
-        {{ object.id }}
+    <div id="drawing-edit" ng-app="GridvizEditor" ng-controller="GridvizController">
+        {% templatetag openvariable %} message {% templatetag closevariable %}
     </div>
+    <script src="{% static "angular/angular.js" %}"></script>
+    <script src="{% static "app.js" %}"></script>
 {% endblock %}
