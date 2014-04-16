@@ -1,0 +1,29 @@
+{% extends "gridviz/base.html" %}
+
+{% block content %}
+    <div id="drawing-list">
+        <div class="content-title">My Drawings
+            <a id="new-drawing" href="/drawings/create" class="action-button">
+                <span class="plus-icon"></span> New Drawing</a>
+        </div>
+        <table class="drawings-table">
+            <thead>
+            <tr>
+                <th>Title</th>
+                <th>Last Modified</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for drawing in drawing_list %}
+                <tr>
+                    <td><a href="{{ drawing.get_absolute_url }}">{{ drawing.title }}</a></td>
+                    <td>{{ drawing.modified_at|date }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% if not drawing_list %}
+            <div class="empty-table-label">You haven't made any drawings yet</div>
+        {% endif %}
+    </div> <!-- /drawings -->
+{% endblock %}
