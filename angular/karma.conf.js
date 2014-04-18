@@ -1,14 +1,15 @@
 //noinspection JSUnresolvedVariable
 module.exports = function (config) {
     config.set({
-        browsers: ['PhantomJS'],
+        browsers: ['Chrome'],
         files: ['../bower_components/angular/angular.js',
                 '../bower_components/angular-mocks/angular-mocks.js',
                 'app.js', 'app.spec.js'],
         frameworks: ['jasmine'],
-        preprocessors: {
-            'app.js': ['coverage']
-        },
-        reporters: ['coverage']
+        reporters: ['progress']
+//        preprocessors: {
+//            'app.js': ['coverage']
+//        },
+//        reporters: ['coverage']
     });
 };
