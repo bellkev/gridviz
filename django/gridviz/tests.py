@@ -37,10 +37,10 @@ class DrawingModelTest(SvgTest):
 
         with self.assertNumQueries(2):
             self.assertEqual(self.test_drawing.get_elements(),
-                             [{'tagName': 'test_type', 'attrs': {}},
-                              {'tagName': 'test_type', 'attrs': {'test_attr': 1}},
-                              {'tagName': 'test_type', 'attrs': {'test_attr': 2}},
-                              {'tagName': 'test_type', 'attrs': {'attr_2': 4, 'attr_1': 3}}])
+                             [{'id': self.test_element.pk, 'tagName': 'test_type', 'attrs': {}},
+                              {'id': el1.pk, 'tagName': 'test_type', 'attrs': {'test_attr': 1}},
+                              {'id': el2.pk, 'tagName': 'test_type', 'attrs': {'test_attr': 2}},
+                              {'id': el3.pk, 'tagName': 'test_type', 'attrs': {'attr_2': 4, 'attr_1': 3}}])
 
 
 class SvgElementModelTest(SvgTest):
