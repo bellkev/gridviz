@@ -1,11 +1,21 @@
 angular.module('gridvizEditor', [])
     .controller('GridvizController', function ($scope) {
-        $scope.message = 'Hello!';
-        $scope.el = {'tagName': 'rect'};
+        $scope.elements = [
+            {
+                tagName: 'rect',
+                attrs: {
+                    x: 100,
+                    y: 100,
+                    width: 100,
+                    height: 100
+                }
+            },
+            {tagName: 'circle'}
+        ]
     })
     .directive('svgElement', function ($compile, $document) {
         var postLink = function (scope, el, attrs) {
-            var html = $document[0].createElement(scope.element.tagName);
+            var html = $document[0].createElementNS('http://www.w3.org/2000/svg', scope.element.tagName);
             var newEl = angular.element(html);
             var lastValues = {};
 

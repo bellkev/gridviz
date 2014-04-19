@@ -1,15 +1,3 @@
-describe('GridvizController', function(){
-
-    beforeEach(module('gridvizEditor'));
-
-    it('should set initial message to be "Hello!"', inject(function($controller) {
-        var scope = {},
-        ctrl = $controller('GridvizController', {$scope:scope});
-        expect(scope.message).toBe('Hello!');
-    }));
-
-});
-
 describe('svgElement', function(){
 
     var scope, el;
@@ -25,6 +13,10 @@ describe('svgElement', function(){
 
     it('should set correct tag name', function () {
         expect(el.children()[0].localName).toBe('rect');
+    });
+
+    it('should use the svg namespace', function () {
+        expect(el.children()[0].namespaceURI).toBe('http://www.w3.org/2000/svg');
     });
 
     it('should bind attributes', function () {

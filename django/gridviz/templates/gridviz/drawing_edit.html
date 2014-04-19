@@ -3,7 +3,9 @@
 
 {% block content %}
     <div id="drawing-edit" ng-app="gridvizEditor" ng-controller="GridvizController">
-        {% templatetag openvariable %} message {% templatetag closevariable %}
+        <svg>
+            <svg-element ng-repeat="element in elements" element="element"></svg-element>
+        </svg>
     </div>
     <script src="{% static "angular/angular.js" %}"></script>
     <script src="{% static "app.js" %}"></script>
