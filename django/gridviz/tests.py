@@ -135,8 +135,7 @@ class DrawingUpdateTests(TestCase):
     def test_json(self):
         response = self.client.get('/drawings/' + str(self.new_drawing.pk),
                                    HTTP_X_REQUESTED_WITH='XMLHttpRequest')
-        self.assertJSONEqual(response.content, json.dumps({'title': 'abc'}))
-
+        self.assertJSONEqual(response.content, json.dumps({'title': 'abc', 'elements': []}))
 
 
 class DrawingDeleteTests(TestCase):

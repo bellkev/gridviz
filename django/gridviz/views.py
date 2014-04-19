@@ -34,7 +34,7 @@ class DrawingUpdate(UpdateView):
     def get(self, request, *args, **kwargs):
         drawing = self.get_object()
         if request.is_ajax():
-            return JsonResponse({'title': drawing.title})
+            return JsonResponse({'title': drawing.title, 'elements': drawing.get_elements()})
         else:
             return super(DrawingUpdate, self).get(request, *args, **kwargs)
 
