@@ -1,9 +1,9 @@
-describe('svgElement', function(){
+describe('svgElement', function () {
 
     var scope, el;
 
     beforeEach(module('gridvizEditor'));
-    beforeEach(inject(function($compile, $rootScope) {
+    beforeEach(inject(function ($compile, $rootScope) {
         scope = $rootScope;
         scope.el =  { tagName: 'rect', attrs: { width: 10 } };
         el = angular.element('<div><svg-element element="el"></svg-element></div>');
@@ -26,4 +26,29 @@ describe('svgElement', function(){
         expect(el.children().attr('width')).toBe('5');
     });
 
+});
+
+describe('editorService', function () {
+    var es;
+
+    beforeEach(module('gridvizEditor'));
+    beforeEach(inject(function (editorService) {
+        es = editorService;
+    }));
+
+    it('should change element coordinates by grid increments', function () {
+        var el =  { tagName: 'rect', attrs: {x: 20, y: 20, width: 20, height: 20} };
+        es.drag(el, {offsetX: 22, offsetY: 22});
+        expect(el.attrs.x).toBe(20);
+        es.drag(el, {offsetX: 32, offsetY: 32});
+        expect(el.attrs.x).toBe(40);
+    });
+
+    it('should handle circle attrs', function () {
+        var el =  { tagName: 'circle', attrs: {cx: 30, cy: 30, r: 10} };
+        es.drag(el, {offsetX: 22, offsetY: 22});
+        expect(el.attrs.cx).toBe(30);
+        es.drag(el, {offsetX: 32, offsetY: 32});
+        expect(el.attrs.cx).toBe(50);
+    });
 });
