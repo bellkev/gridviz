@@ -1,4 +1,4 @@
-angular.module('GridvizEditor', [])
+angular.module('gridvizEditor', [])
     .controller('GridvizController', function ($scope) {
         $scope.message = 'Hello!';
         $scope.el = {'tagName': 'rect'};

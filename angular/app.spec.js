@@ -1,6 +1,6 @@
 describe('GridvizController', function(){
 
-    beforeEach(module('GridvizEditor'));
+    beforeEach(module('gridvizEditor'));
 
     it('should set initial message to be "Hello!"', inject(function($controller) {
         var scope = {},
@@ -10,11 +10,11 @@ describe('GridvizController', function(){
 
 });
 
-describe('SvgElement', function(){
+describe('svgElement', function(){
 
     var scope, el;
 
-    beforeEach(module('GridvizEditor'));
+    beforeEach(module('gridvizEditor'));
     beforeEach(inject(function($compile, $rootScope) {
         scope = $rootScope;
         scope.el =  { tagName: 'rect', attrs: { width: 10 } };
