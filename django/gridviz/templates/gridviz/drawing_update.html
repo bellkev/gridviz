@@ -1,7 +1,7 @@
-{% extends "gridviz/base.html" %}
+{% extends "gridviz/form_content_base.html" %}
 {% load bootstrap %}
 
-{% block content %}
+{% block form_content %}
     <div id="drawing-update">
         <div class="content-title">{{ object.title }}</div>
         <form class="form-horizontal" method="post">{% csrf_token %}
