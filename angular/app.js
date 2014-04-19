@@ -1,25 +1,9 @@
 angular.module('gridvizEditor', [])
-    .controller('GridvizController', function ($scope) {
-
-        $scope.elements = [
-            {
-                tagName: 'rect',
-                attrs: {
-                    x: 100,
-                    y: 100,
-                    width: 100,
-                    height: 100
-                }
-            },
-            {
-                tagName: 'circle',
-                attrs: {
-                    cx: 250,
-                    cy: 250,
-                    r: 50
-                }
-            }
-        ];
+    .controller('GridvizController', function ($scope, $http, $location) {
+        var url = $location.absUrl().replace(/\/edit.*/, '');
+        $http.get(url, {headers: {'X-Requested-With': 'XMLHttpRequest'}}).then( function (response) {
+            $scope.drawing = response.data;
+        });
 
     }).directive('svgElement', function ($compile, $document, editorService) {
         var postLink = function (scope, el, attrs) {

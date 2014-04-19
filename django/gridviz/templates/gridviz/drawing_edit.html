@@ -4,7 +4,7 @@
 {% block content %}
     <div id="drawing-edit" ng-app="gridvizEditor" ng-controller="GridvizController">
         <svg>
-            <svg-element ng-repeat="element in elements" element="element"></svg-element>
+            <svg-element ng-repeat="element in drawing.elements" element="element"></svg-element>
         </svg>
     </div>
     <script src="{% static "jquery/dist/jquery.js" %}"></script>

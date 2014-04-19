@@ -1,5 +1,37 @@
-describe('svgElement', function () {
+describe('GridvizController', function () {
+    var scope, backend, loc, createController;
 
+    beforeEach(module('gridvizEditor'));
+    beforeEach(inject(function ($httpBackend, $controller) {
+        backend = $httpBackend;
+        loc = { absUrl: function () {
+            return  "http://www.gridviz.com/drawings/5/edit"
+        }};
+        scope = {};
+        createController = function() {
+            return $controller('GridvizController', {'$scope': scope, '$location': loc});
+        };
+    }));
+
+    afterEach(function () {
+        backend.verifyNoOutstandingExpectation();
+        backend.verifyNoOutstandingRequest();
+    });
+
+    it('should get initial drawing dump', function () {
+        var drawing = {
+            "elements": [
+                {"attrs": {"y": 200.0, "x": 200.0, "height": 200.0, "width": 200.0}, "tagName": "rect"}
+            ],
+            "title": "asdf"};
+        backend.expectGET('http://www.gridviz.com/drawings/5').respond(drawing);
+        createController();
+        backend.flush();
+        expect(scope.drawing.elements[0].attrs.y).toBe(200.0);
+    });
+});
+
+describe('svgElement', function () {
     var scope, el;
 
     beforeEach(module('gridvizEditor'));
