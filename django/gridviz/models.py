@@ -23,7 +23,7 @@ class Drawing(models.Model):
         def attr_dict(data):
             return dict([(datum.attribute.name, datum.value) for datum in data])
 
-        return [{el.type.name: attr_dict(el.data.all())} for el in
+        return [{'tagName': el.type.name, 'attrs': attr_dict(el.data.all())} for el in
                 qs.prefetch_related(Prefetch('data', queryset=pre_qs))]
 
 
