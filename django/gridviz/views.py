@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.core.urlresolvers import reverse_lazy
 
@@ -29,6 +30,13 @@ class DrawingUpdate(UpdateView):
     model = Drawing
     fields = ['title']
     template_name_suffix = '_update'
+
+    def get(self, request, *args, **kwargs):
+        drawing = self.get_object()
+        if request.is_ajax():
+            return JsonResponse({'title': drawing.title})
+        else:
+            return super(DrawingUpdate, self).get(request, *args, **kwargs)
 
 drawing_update = DrawingUpdate.as_view()
 

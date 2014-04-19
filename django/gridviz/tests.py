@@ -119,10 +119,22 @@ class DrawingCreateTests(TestCase):
 
 
 class DrawingUpdateTests(TestCase):
+    def setUp(self):
+        self.new_drawing = Drawing.objects.create(title='abc')
+
     def test_rename(self):
-        new_drawing = Drawing.objects.create(title='abc')
-        self.client.post('/drawings/' + str(new_drawing.pk), {'title': 'def'})
-        self.assertEqual(Drawing.objects.get(pk=new_drawing.pk).title, 'def')
+        self.client.post('/drawings/' + str(self.new_drawing.pk), {'title': 'def'})
+        self.assertEqual(Drawing.objects.get(pk=self.new_drawing.pk).title, 'def')
+
+    def test_html(self):
+        response = self.client.get('/drawings/' + str(self.new_drawing.pk))
+        self.assertContains(response, "Edit Drawing")
+
+    def test_json(self):
+        response = self.client.get('/drawings/' + str(self.new_drawing.pk),
+                                   HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertJSONEqual(response.content, json.dumps({'title': 'abc'}))
+
 
 
 class DrawingDeleteTests(TestCase):
