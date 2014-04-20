@@ -5,7 +5,8 @@
     "bootstrap": "3.1.1",
     "angular": "1.2.16",
     "jquery": "2.1.0",
-    "jquery.threedubmedia": "threedubmedia/jquery.threedubmedia#2.2"
+    "jquery.threedubmedia": "threedubmedia/jquery.threedubmedia#2.2",
+    "lodash": "2.4.1"
   },
   "devDependencies": {
     "angular-mocks": "1.2.16"
