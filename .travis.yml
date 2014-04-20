@@ -8,5 +8,5 @@ install:
   - npm install
   - bower install
 script:
-  - python manage.py test gridviz
+  - python django/manage.py test gridviz
   - karma start angular/karma-coverage.conf.js --single-run
