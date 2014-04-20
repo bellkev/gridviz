@@ -4,7 +4,7 @@ python:
 install:
   - pip install https://github.com/django/django/archive/1.7b1.zip
   - pip install -r requirements.txt
-  - npm install -g karma-cli
+  - npm install -g karma-cli bower
   - npm install
   - bower install
 script:
