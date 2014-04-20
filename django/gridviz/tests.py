@@ -35,7 +35,7 @@ class DrawingModelTest(SvgTest):
         SvgLengthDatum.objects.create(element=el3, attribute=attr_1, value=3)
         SvgLengthDatum.objects.create(element=el3, attribute=attr_2, value=4)
 
-        with self.assertNumQueries(0):
+        with self.assertNumQueries(2):
             self.assertEqual(self.test_drawing.get_elements(),
                              [{'id': self.test_element.pk, 'tagName': 'test_type', 'attrs': {}},
                               {'id': el1.pk, 'tagName': 'test_type', 'attrs': {'test_attr': 1}},
