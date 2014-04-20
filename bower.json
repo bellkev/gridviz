@@ -9,6 +9,7 @@
     "lodash": "2.4.1"
   },
   "devDependencies": {
-    "angular-mocks": "1.2.16"
+    "angular-mocks": "1.2.16",
+    "jquery-simulate": "jquery/jquery-simulate#2b450a99316c50b54fd577e7cfbe50fd5bdbe7d3"
   }
 }
