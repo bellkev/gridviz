@@ -1,0 +1,11 @@
+language: python
+python:
+  - "2.7"
+install:
+  - pip install -r requirements.txt
+  - npm install -g karma-cli
+  - npm install
+  - bower install
+script:
+  - python manage.py test gridviz
+  - karma start angular/karma-coverage.conf.js --single-run
