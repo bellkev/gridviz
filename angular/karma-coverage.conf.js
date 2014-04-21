@@ -5,7 +5,7 @@ module.exports = function (config) {
     config.set({
         browsers: ['PhantomJS'],
         preprocessors: {
-            'app.js': ['coverage']
+            'angular/app.js': ['coverage']
         },
         reporters: ['coverage', 'dots'],
         coverageReporter: {
