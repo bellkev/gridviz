@@ -11,5 +11,5 @@ script:
   - coverage run --source=gridviz django/manage.py test gridviz
   - karma start angular/karma-coverage.conf.js --single-run
 after_success:
-  coveralls
-  cat angular/coverage/PhantomJS*/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+  - coveralls
+  - cat angular/coverage/PhantomJS*/lcov.info | ./node_modules/coveralls/bin/coveralls.js
