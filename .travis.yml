@@ -1,6 +1,6 @@
 language: python
 python:
-  - "2.7"
+  - 2.7
 install:
   - pip install https://github.com/django/django/archive/1.7b1.zip
   - pip install -r requirements.txt
@@ -8,5 +8,7 @@ install:
   - npm install
   - bower install
 script:
-  - python django/manage.py test gridviz
+  - coverage run --source=gridviz django/manage.py test gridviz
   - karma start angular/karma-coverage.conf.js --single-run
+after_success:
+  coveralls

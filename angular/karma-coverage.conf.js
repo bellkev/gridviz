@@ -7,6 +7,10 @@ module.exports = function (config) {
         preprocessors: {
             'app.js': ['coverage']
         },
-        reporters: ['coverage']
+        reporters: ['coverage', 'dots'],
+        coverageReporter: {
+            type : 'lcovonly',
+            dir : 'coverage/'
+        }
     });
 };
