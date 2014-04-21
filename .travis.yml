@@ -12,3 +12,4 @@ script:
   - karma start angular/karma-coverage.conf.js --single-run
 after_success:
   coveralls
+  cat angular/coverage/PhantomJS*/lcov.info | ./node_modules/coveralls/bin/coveralls.js
