@@ -1,12 +1,5 @@
-"""
-Django settings for gridviz2 project.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/dev/topics/settings/
-
-For the full list of settings and their values, see
-https://docs.djangoproject.com/en/dev/ref/settings/
-"""
+# Copyright (c) 2014 Kevin Bell. All rights reserved.
+# See the file LICENSE.txt for copying permission.
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os

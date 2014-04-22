@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2014 Kevin Bell. All rights reserved.
+ * See the file LICENSE.txt for copying permission.
+ */
+
 angular.module('gridvizEditor', [])
     .controller('GridvizController',function ($scope, $http, $location, messageService) {
         var url = $location.absUrl().replace(/\/edit.*/, '');

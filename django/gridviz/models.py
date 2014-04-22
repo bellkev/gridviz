@@ -1,3 +1,6 @@
+# Copyright (c) 2014 Kevin Bell. All rights reserved.
+# See the file LICENSE.txt for copying permission.
+
 from django.db import models
 from django.core.urlresolvers import reverse
 from django.db.models import Prefetch

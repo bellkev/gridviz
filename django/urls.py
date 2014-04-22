@@ -1,3 +1,6 @@
+# Copyright (c) 2014 Kevin Bell. All rights reserved.
+# See the file LICENSE.txt for copying permission.
+
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 

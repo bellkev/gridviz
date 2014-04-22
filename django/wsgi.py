@@ -1,11 +1,5 @@
-"""
-WSGI config for gridviz2 project.
-
-It exposes the WSGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/dev/howto/deployment/wsgi/
-"""
+# Copyright (c) 2014 Kevin Bell. All rights reserved.
+# See the file LICENSE.txt for copying permission.
 
 import os
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
