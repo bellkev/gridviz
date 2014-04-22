@@ -141,4 +141,47 @@ describe('gridvizEditor', function () {
             });
         });
     });
+
+    describe('messageService', function () {
+        var ms, lastMessage, ws, dummyData;
+        beforeEach(module('gridvizEditor'));
+        beforeEach(module(function ($provide) {
+            $provide.value('$window', {
+                WebSocket: function (uri) {
+                    this.send = function (message) {
+                        lastMessage = message;
+                    };
+                    ws = this;
+                }
+            });
+        }));
+        beforeEach(inject(function (messageService) {
+            ms = messageService;
+            dummyData = {foo: 'bar'};
+        }));
+
+        it('should add id, stringify, and send ws messages', function () {
+            ms.sendMessage(dummyData);
+            expect(JSON.parse(lastMessage)).toEqual(_.merge(dummyData, {clientId: ms.clientId}));
+        });
+
+        it('should parse and broadcast messages from server to listeners', function () {
+            var result;
+            ms.onMessage( function (data) {
+                result = data;
+            });
+            ws.onmessage({data: JSON.stringify(dummyData)});
+            expect(result).toEqual(dummyData);
+        });
+
+        it('should not re-broadcast its own (non-persistent) messages', function () {
+            var result;
+            ms.sendMessage(dummyData);
+            ms.onMessage(function (message) {
+                result = message;
+            });
+            ws.onmessage({data: lastMessage});
+            expect(result).toBeUndefined();
+        });
+    });
 });

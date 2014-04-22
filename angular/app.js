@@ -96,7 +96,7 @@ angular.module('gridvizEditor', [])
         var ws = new $window.WebSocket(uri);
         // A random 32-bit int as hex
         var randomHex = function () { return Math.floor(Math.random() * Math.pow(2, 32)).toString(16); };
-        var clientId = randomHex() + randomHex();
+        var clientId = this.clientId = randomHex() + randomHex();
 
         var uiMessageName = 'gridviz.ui.message';
 
@@ -113,7 +113,6 @@ angular.module('gridvizEditor', [])
         };
 
         this.sendMessage = function (data) {
-            data.clientId = clientId;
-            ws.send(JSON.stringify(data));
+            ws.send(JSON.stringify(_.merge(data, {clientId: clientId})));
         };
     });

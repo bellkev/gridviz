@@ -1,0 +1,4 @@
+[run]
+source = gridviz
+omit = gridviz/tests.py
+branch = True
