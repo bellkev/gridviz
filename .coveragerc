@@ -1,4 +1,4 @@
 [run]
 source = gridviz
-omit = gridviz/tests.py
+omit = django/gridviz/tests.py
 branch = True
