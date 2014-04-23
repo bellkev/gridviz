@@ -80,3 +80,70 @@
         color: @state-danger-text;
     }
 }
+
+#drawing-edit {
+    svg {
+        display: block;
+    }
+
+    .panel-border(@side) {
+        border-@{side}: 1px solid @gray-accent;
+    }
+
+    .panel {
+        position: fixed;
+        top: @global-nav-height;
+        bottom: 0;
+        background: @content-color;
+        width: 260px;
+        transition: width 0.5s;
+        .panel-border(top);
+    }
+
+    .panel-closed {
+        .panel;
+        width: 20px;
+        .left-handle-arrow {
+            .glyphicon-chevron-right;
+        }
+        .right-handle-arrow {
+            .glyphicon-chevron-left;
+        }
+    }
+
+    #left-panel {
+        left: 0;
+    }
+
+    .handle {
+        width: 20px;
+        height: 100%;
+        cursor: pointer;
+        &:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+    }
+
+    .handle-arrow {
+        .glyphicon;
+        color: @gray-accent;
+        top: 50%;
+        font-size: 18px;
+    }
+
+    .left-handle-arrow {
+        .handle-arrow;
+        .glyphicon-chevron-left;
+    }
+
+    .right-handle-arrow {
+        .handle-arrow;
+        .glyphicon-chevron-right;
+    }
+
+    #left-panel-handle {
+        .handle;
+        .panel-border(left);
+        float: right;
+    }
+}

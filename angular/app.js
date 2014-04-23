@@ -26,7 +26,15 @@ angular.module('gridvizEditor', [])
             }
         });
 
+        $scope.panelState = {closed: true};
 
+        $scope.getPanelClass = function () {
+            return $scope.panelState.closed ? 'panel-closed' : 'panel';
+        };
+
+        $scope.togglePanel = function () {
+            $scope.panelState.closed = !$scope.panelState.closed;
+        }
     }).directive('svgElement',function ($compile, $document, editorService) {
         var postLink = function (scope, el) {
             var html, newEl, lastValues = {};

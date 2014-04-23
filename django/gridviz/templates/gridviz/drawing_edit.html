@@ -9,11 +9,19 @@
         <svg>
             <svg-element ng-repeat="element in drawing.elements" element="element"></svg-element>
         </svg>
+        <div id="left-panel" ng-class="getPanelClass()">
+            <div id="left-panel-handle" ng-click="togglePanel()">
+                <span class="left-handle-arrow"></span>
+            </div>
+        </div>
     </div>
+
+    <!-- libraries -->
     <script src="{% static "jquery/dist/jquery.js" %}"></script>
     <script src="{% static "jquery.threedubmedia/event.drag/jquery.event.drag.js" %}"></script>
     <script src="{% static "angular/angular.js" %}"></script>
     <script src="{% static "lodash/dist/lodash.js" %}"></script>
 
+    <!-- app -->
     <script src="{% static "app.js" %}"></script>
 {% endblock %}
