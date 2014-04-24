@@ -9,11 +9,19 @@
         <svg>
             <svg-element ng-repeat="element in drawing.elements" element="element"></svg-element>
         </svg>
-        <div id="left-panel" ng-class="getPanelClass()">
-            <div id="left-panel-handle" ng-click="togglePanel()">
-                <span class="left-handle-arrow"></span>
+        <panel dock="left">
+            <p class="panel-title">Add a shape:</p>
+            <div>
+                <button class="add-shape-button" ng-click="console.log('hello')">
+                    <svg width="30" height="30">
+                        <rect x="5" y="5" width="20" height="20" fill-opacity="0" stroke="black"></rect>
+                    </svg>
+                </button>
             </div>
-        </div>
+        </panel>
+        <panel dock="right">
+            Modify the shape:
+        </panel>
     </div>
 
     <!-- libraries -->
@@ -24,4 +32,5 @@
 
     <!-- app -->
     <script src="{% static "app.js" %}"></script>
+
 {% endblock %}

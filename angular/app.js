@@ -25,17 +25,20 @@ angular.module('gridvizEditor', [])
                 $scope.$apply();
             }
         });
-
-        $scope.panelState = {closed: true};
-
-        $scope.getPanelClass = function () {
-            return $scope.panelState.closed ? 'panel-closed' : 'panel';
-        };
-
-        $scope.togglePanel = function () {
-            $scope.panelState.closed = !$scope.panelState.closed;
+    }).directive('panel', function() {
+        return {
+            templateUrl: '/static/templates/panel.html',
+            restrict: 'E',
+            transclude: true,
+            scope: {},
+            link: function (scope, el, attrs) {
+                scope.panelClasses = {
+                    closed: true
+                };
+                scope.panelClasses[attrs.dock] = true;
+            }
         }
-    }).directive('svgElement',function ($compile, $document, editorService) {
+    }).directive('svgElement', function ($compile, $document, editorService) {
         var postLink = function (scope, el) {
             var html, newEl, lastValues = {};
 

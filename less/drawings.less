@@ -90,60 +90,91 @@
         border-@{side}: 1px solid @gray-accent;
     }
 
+    @handle-width: 30px;
+    @content-width: 220px;
+
     .panel {
         position: fixed;
         top: @global-nav-height;
         bottom: 0;
         background: @content-color;
-        width: 260px;
-        transition: width 0.5s;
+        width: @handle-width + @content-width;
+        transition: left 0.5s, right 0.5s;
         .panel-border(top);
-    }
 
-    .panel-closed {
-        .panel;
-        width: 20px;
-        .left-handle-arrow {
-            .glyphicon-chevron-right;
+        &.left {
+            left: 0;
+            &.closed {
+                left: -@content-width;
+            }
         }
-        .right-handle-arrow {
-            .glyphicon-chevron-left;
+
+        &.right {
+            right: 0;
+            &.closed {
+                right: -@content-width;
+            }
         }
     }
 
-    #left-panel {
-        left: 0;
+    .panel-content {
+        padding: 10px;
+        width: @content-width;
+
+        &.left {
+            float: left;
+        }
+
+        &.right {
+            float: right;
+        }
     }
 
-    .handle {
-        width: 20px;
+    .panel-handle {
+        width: @handle-width;
         height: 100%;
         cursor: pointer;
+        text-align: center;
         &:hover {
             background: rgba(0, 0, 0, 0.05);
         }
+
+        &.left {
+            float: right;
+            .panel-border(left);
+        }
+
+        &.right {
+            float: left;
+            .panel-border(right);
+        }
     }
 
-    .handle-arrow {
+    .panel-arrow {
         .glyphicon;
         color: @gray-accent;
         top: 50%;
-        font-size: 18px;
+        font-size: 150%;
+
+        &.left,
+        &.right.closed {
+            .glyphicon-chevron-left;
+        }
+
+        &.left.closed,
+        &.right {
+            .glyphicon-chevron-right;
+        }
     }
 
-    .left-handle-arrow {
-        .handle-arrow;
-        .glyphicon-chevron-left;
+    .panel-title {
+        font-size: 150%;
+        margin-bottom: 5px;
     }
 
-    .right-handle-arrow {
-        .handle-arrow;
-        .glyphicon-chevron-right;
-    }
-
-    #left-panel-handle {
-        .handle;
-        .panel-border(left);
-        float: right;
+    .add-shape-button {
+        .btn;
+        .btn-default;
+        float: left;
     }
 }
