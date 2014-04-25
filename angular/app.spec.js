@@ -125,7 +125,7 @@ describe('gridvizEditor', function () {
                 expect(lastMessage).toBeUndefined();
             });
 
-            it('should send a message if moved  a grid space', function () {
+            it('should send a message if moved a grid space', function () {
                 es.drag(rect, {offsetX: 32, offsetY: 32});
                 //expect(rect.attrs.x).toBe(40);
                 expect(lastMessage).toEqual({
@@ -167,6 +167,15 @@ describe('gridvizEditor', function () {
         it('should add id, stringify, and send ws messages', function () {
             ms.broadcastMessage(dummyData);
             expect(JSON.parse(lastMessage)).toEqual(_.merge(dummyData, {clientId: ms.clientId}));
+        });
+
+        it('should broadcast local ui messages', function () {
+            var result;
+            ms.onMessage(function (data) {
+                result = data;
+            });
+            ms.broadcastMessage({foo: 'bar'});
+            expect(result.foo).toBe('bar');
         });
 
         it('should parse and broadcast messages from server to listeners', function () {

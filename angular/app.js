@@ -20,11 +20,32 @@ angular.module('gridvizEditor', [])
         };
 
         messageService.onMessage(function (data) {
-            if (data.action = 'update_el') {
+            if (data.action === 'update_el') {
                 getElementById(data.id).attrs = data.attrs;
                 $scope.$apply();
             }
+            else if (data.action === 'create_el') {
+                $scope.drawing.elements.push({
+                    id: data.id || data.tempId,
+                    tagName: data.tagName,
+                    attrs: _.clone(data.attrs)
+                })
+            }
         });
+
+        $scope.createRect = function () {
+            messageService.broadcastMessage({
+                action: 'create_el',
+                tagName: 'rect',
+                tempId: _.uniqueId(),
+                attrs: {
+                    x: 300,
+                    y: 100,
+                    width: 40,
+                    height: 40
+                }
+            })
+        };
     }).directive('panel', function() {
         return {
             templateUrl: '/static/templates/panel.html',
@@ -123,6 +144,7 @@ angular.module('gridvizEditor', [])
         };
 
         this.broadcastMessage = function (data) {
+            $rootScope.$emit(uiMessageName, data);
             ws.send(JSON.stringify(_.merge(data, {clientId: clientId})));
         };
     });
