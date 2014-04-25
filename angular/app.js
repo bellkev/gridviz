@@ -94,10 +94,9 @@ angular.module('gridvizEditor', [])
             });
 
             if (!_.isEmpty(diff)) {
-                _.merge(el.attrs, diff);
-                var message = {action: 'update_el', id: el.id};
-                message.attrs = el.attrs;
-                messageService.sendMessage(message);
+                var newAttrs = _.merge(_.clone(el.attrs), diff);
+                var message = {action: 'update_el', id: el.id, attrs: newAttrs};
+                messageService.broadcastMessage(message);
             }
         };
     }).service('messageService', function ($location, $window, $rootScope) {
@@ -123,7 +122,7 @@ angular.module('gridvizEditor', [])
             });
         };
 
-        this.sendMessage = function (data) {
+        this.broadcastMessage = function (data) {
             ws.send(JSON.stringify(_.merge(data, {clientId: clientId})));
         };
     });

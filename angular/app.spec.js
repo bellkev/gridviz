@@ -61,7 +61,7 @@ describe('gridvizEditor', function () {
             scope = $rootScope;
             scope.el =  { tagName: 'rect', attrs: { x: 10, y: 10, width: 10, height: 10 } };
             el = angular.element('<svg><svg-element element="el"></svg-element></svg>');
-            angular.element('body').append(el)
+            angular.element('body').append(el);
             $compile(el)(scope);
             scope.$apply();
         }));
@@ -104,7 +104,7 @@ describe('gridvizEditor', function () {
         beforeEach(module('gridvizEditor'));
         beforeEach(module(function ($provide) {
             $provide.value('messageService', {
-                sendMessage: function (message) {
+                broadcastMessage: function (message) {
                     lastMessage = message;
                 }
             });
@@ -115,7 +115,7 @@ describe('gridvizEditor', function () {
         }));
         beforeEach(function () {
             rect = { id: 1, tagName: 'rect', attrs: {x: 20, y: 20, width: 20, height: 20} };
-            circle = { tagName: 'circle', attrs: {cx: 30, cy: 30, r: 10} };
+            circle = { id: 2, tagName: 'circle', attrs: {cx: 30, cy: 30, r: 10} };
         });
 
         describe('drag', function () {
@@ -125,19 +125,23 @@ describe('gridvizEditor', function () {
                 expect(lastMessage).toBeUndefined();
             });
 
-            it('should change attrs and send a message if moved  a grid space', function () {
+            it('should send a message if moved  a grid space', function () {
                 es.drag(rect, {offsetX: 32, offsetY: 32});
-                expect(rect.attrs.x).toBe(40);
+                //expect(rect.attrs.x).toBe(40);
                 expect(lastMessage).toEqual({
                     action : 'update_el',
                     id : 1,
-                    attrs : { x : 40, y : 40, width : 20, height : 20 }
+                    attrs : { x: 40, y: 40, width: 20, height: 20 }
                 });
             });
 
             it('should handle circle attrs', function () {
                 es.drag(circle, {offsetX: 32, offsetY: 32});
-                expect(circle.attrs.cx).toBe(50);
+                expect(lastMessage).toEqual({
+                    action : 'update_el',
+                    id : 2,
+                    attrs : { cx: 50, cy: 50, r:10 }
+                });
             });
         });
     });
@@ -161,7 +165,7 @@ describe('gridvizEditor', function () {
         }));
 
         it('should add id, stringify, and send ws messages', function () {
-            ms.sendMessage(dummyData);
+            ms.broadcastMessage(dummyData);
             expect(JSON.parse(lastMessage)).toEqual(_.merge(dummyData, {clientId: ms.clientId}));
         });
 
@@ -176,7 +180,7 @@ describe('gridvizEditor', function () {
 
         it('should not re-broadcast its own (non-persistent) messages', function () {
             var result;
-            ms.sendMessage(dummyData);
+            ms.broadcastMessage(dummyData);
             ms.onMessage(function (message) {
                 result = message;
             });
