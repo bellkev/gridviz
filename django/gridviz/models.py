@@ -55,6 +55,11 @@ class SvgDatumBase(models.Model):
     objects = InheritanceManager()
 
 
-class SvgLengthDatum(SvgDatumBase):
-    data_type = svg_data_types.LENGTH_TYPE
+class SvgFloatDatum(SvgDatumBase):
+    data_type = svg_data_types.FLOAT_TYPE
     value = models.FloatField()
+
+
+class SvgCharDatum(SvgDatumBase):
+    data_type = svg_data_types.CHAR_TYPE
+    value = models.CharField(max_length=255)

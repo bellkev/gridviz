@@ -6,7 +6,7 @@ import json
 from django.test import TestCase
 from gridviz import svg_data_types
 
-from .models import Drawing, SvgElementType, SvgElement, SvgAttribute, SvgLengthDatum
+from .models import Drawing, SvgElementType, SvgElement, SvgAttribute, SvgFloatDatum, SvgCharDatum
 from .messages import process_message
 
 
@@ -14,7 +14,7 @@ class SvgTest(TestCase):
     def setUp(self):
         self.test_drawing = Drawing.objects.create(title='test_drawing')
         self.test_type = SvgElementType.objects.create(name='test_type')
-        self.test_attr = SvgAttribute.objects.create(name='test_attr', data_type=svg_data_types.LENGTH_TYPE)
+        self.test_attr = SvgAttribute.objects.create(name='test_attr', data_type=svg_data_types.FLOAT_TYPE)
         self.test_element = SvgElement.objects.create(type=self.test_type, drawing=self.test_drawing)
 
 
@@ -31,12 +31,12 @@ class DrawingModelTest(SvgTest):
         el1 = SvgElement.objects.create(type=self.test_type, drawing=self.test_drawing)
         el2 = SvgElement.objects.create(type=self.test_type, drawing=self.test_drawing)
         el3 = SvgElement.objects.create(type=self.test_type, drawing=self.test_drawing)
-        attr_1 = SvgAttribute.objects.create(name='attr_1', data_type=svg_data_types.LENGTH_TYPE)
-        attr_2 = SvgAttribute.objects.create(name='attr_2', data_type=svg_data_types.LENGTH_TYPE)
-        SvgLengthDatum.objects.create(element=el1, attribute=self.test_attr, value=1)
-        SvgLengthDatum.objects.create(element=el2, attribute=self.test_attr, value=2)
-        SvgLengthDatum.objects.create(element=el3, attribute=attr_1, value=3)
-        SvgLengthDatum.objects.create(element=el3, attribute=attr_2, value=4)
+        attr_1 = SvgAttribute.objects.create(name='attr_1', data_type=svg_data_types.FLOAT_TYPE)
+        attr_2 = SvgAttribute.objects.create(name='attr_2', data_type=svg_data_types.FLOAT_TYPE)
+        SvgFloatDatum.objects.create(element=el1, attribute=self.test_attr, value=1)
+        SvgFloatDatum.objects.create(element=el2, attribute=self.test_attr, value=2)
+        SvgFloatDatum.objects.create(element=el3, attribute=attr_1, value=3)
+        SvgFloatDatum.objects.create(element=el3, attribute=attr_2, value=4)
 
         with self.assertNumQueries(2):
             self.assertEqual(self.test_drawing.get_elements(),
@@ -48,18 +48,24 @@ class DrawingModelTest(SvgTest):
 
 class SvgElementModelTest(SvgTest):
     def test_get_attrs(self):
-        attr_1 = SvgAttribute.objects.create(name='attr_1', data_type=svg_data_types.LENGTH_TYPE)
-        attr_2 = SvgAttribute.objects.create(name='attr_2', data_type=svg_data_types.LENGTH_TYPE)
-        SvgLengthDatum.objects.create(element=self.test_element, attribute=attr_1, value=1)
-        SvgLengthDatum.objects.create(element=self.test_element, attribute=attr_2, value=2)
+        attr_1 = SvgAttribute.objects.create(name='attr_1', data_type=svg_data_types.FLOAT_TYPE)
+        attr_2 = SvgAttribute.objects.create(name='attr_2', data_type=svg_data_types.FLOAT_TYPE)
+        SvgFloatDatum.objects.create(element=self.test_element, attribute=attr_1, value=1)
+        SvgFloatDatum.objects.create(element=self.test_element, attribute=attr_2, value=2)
         with self.assertNumQueries(1):
             self.assertEqual(self.test_element.get_attrs(), {'attr_1': 1, 'attr_2': 2})
 
 
-class SvgLengthDatumModelTest(SvgTest):
+class SvgFloatDatumModelTest(SvgTest):
     def test_length(self):
-        SvgLengthDatum.objects.create(element=self.test_element, attribute=self.test_attr, value=12.5)
-        self.assertEqual(SvgElement.objects.first().data.first().svglengthdatum.value, 12.5)
+        SvgFloatDatum.objects.create(element=self.test_element, attribute=self.test_attr, value=12.5)
+        self.assertEqual(SvgElement.objects.first().data.first().svgfloatdatum.value, 12.5)
+
+
+class SvgCharDatumModelTest(SvgTest):
+    def test_length(self):
+        SvgCharDatum.objects.create(element=self.test_element, attribute=self.test_attr, value='abc')
+        self.assertEqual(SvgElement.objects.first().data.first().svgchardatum.value, 'abc')
 
 
 class ProjectTests(TestCase):
@@ -156,10 +162,10 @@ class MessageQueries(SvgTest):
 
     def test_create(self):
         result = process_message(self.test_drawing, self.test_message)
-        datum = SvgLengthDatum.objects.first()
+        datum = SvgFloatDatum.objects.first()
         expected = json.dumps({'action': 'add_attr', 'element_id': self.test_element.pk, 'temp_id': 123,
                                'id': datum.pk, 'attr_name': 'test_attr', 'attr_value': 25})
-        self.assertEqual(SvgLengthDatum.objects.first().value, 25)
+        self.assertEqual(SvgFloatDatum.objects.first().value, 25)
         self.assertEqual(expected, result)
 
     def test_drawing_filter(self):

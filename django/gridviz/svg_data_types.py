@@ -3,4 +3,6 @@
 
 # http://www.w3.org/TR/SVG11/types.html
 
-LENGTH_TYPE = 0
+FLOAT_TYPE = 0
+
+CHAR_TYPE = 1
