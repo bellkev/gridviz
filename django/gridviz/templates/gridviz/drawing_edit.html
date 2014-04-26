@@ -5,10 +5,14 @@
 {% load staticfiles %}
 
 {% block content %}
-    <div id="drawing-edit" ng-app="gridvizEditor" ng-controller="GridvizController">
+    <div id="drawing-edit" ng-app="gridvizEditor" ng-controller="GridvizController" ng-click="deselectAll($event)">
         <svg>
-            <svg-element ng-repeat="element in drawing.elements" element="element"></svg-element>
+            <svg-element ng-repeat="element in drawing.elements" element="element"
+                    deselect="deselectAll()"></svg-element>
         </svg>
+        <div ng-repeat="selection in selections">
+
+        </div>
         <panel dock="left">
             <p class="panel-title">Add a shape:</p>
             <div>

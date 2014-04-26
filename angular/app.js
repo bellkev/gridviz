@@ -4,7 +4,7 @@
  */
 
 angular.module('gridvizEditor', [])
-    .controller('GridvizController',function ($scope, $http, $location, messageService) {
+    .controller('GridvizController', function ($scope, $http, $location, messageService) {
         var url = $location.absUrl().replace(/\/edit.*/, '');
         $http.get(url, {headers: {'X-Requested-With': 'XMLHttpRequest'}}).then(function (response) {
             $scope.drawing = response.data;
@@ -22,7 +22,6 @@ angular.module('gridvizEditor', [])
         messageService.onMessage(function (data) {
             if (data.action === 'update_el') {
                 getElementById(data.id).attrs = data.attrs;
-                $scope.$apply();
             }
             else if (data.action === 'create_el') {
                 $scope.drawing.elements.push({
@@ -31,6 +30,7 @@ angular.module('gridvizEditor', [])
                     attrs: _.clone(data.attrs)
                 })
             }
+            $scope.$apply();
         });
 
         $scope.createRect = function () {
@@ -46,7 +46,15 @@ angular.module('gridvizEditor', [])
                 }
             })
         };
-    }).directive('panel', function() {
+
+        $scope.deselectAll = function (ev) {
+            if (!ev || ev.target === ev.currentTarget) {
+                _.forEach($scope.drawing.elements, function (el) {
+                    el.selected = false;
+                });
+            }
+        }
+    }).directive('panel', function () {
         return {
             templateUrl: '/static/templates/panel.html',
             restrict: 'E',
@@ -65,9 +73,41 @@ angular.module('gridvizEditor', [])
 
             // Set tag name
             html = document.createElementNS('http://www.w3.org/2000/svg', scope.element.tagName);
-            newEl = angular.element(html);
+            newEl = $(html);
             el.replaceWith(newEl);
             $compile(newEl)(scope);
+
+            // Make selectable
+            newEl.mousedown(function (ev) {
+                scope.deselect();
+                scope.element.selected = true;
+                scope.$apply();
+            });
+
+            var corners = _.times(4, _.constant('<div class="select-corner"/>')).map($);
+            $document.find('#drawing-edit').append(corners);
+
+            var updateCorners = function () {
+                var pos = newEl.offset();
+                _.merge(pos, {
+                    bottom: pos.top + newEl[0].getBoundingClientRect().height,
+                    right: pos.left + newEl[0].getBoundingClientRect().width
+                });
+
+                var mappings = [
+                    {top: 'top', left: 'left'},
+                    {top: 'top', left: 'right'},
+                    {top: 'bottom', left: 'left'},
+                    {top: 'bottom', left: 'right'}
+                ];
+                _.forEach(corners, function (corner, index) {
+                    corner.css({
+                        display: scope.element.selected ? 'block' : 'none',
+                        top: pos[mappings[index]['top']],
+                        left: pos[mappings[index]['left']]
+                    });
+                });
+            };
 
             // Bind attrs
             scope.$watch(function () {
@@ -78,6 +118,7 @@ angular.module('gridvizEditor', [])
                         lastValues[key] = val;
                     }
                 });
+                updateCorners();
             });
 
             // Make draggable
@@ -90,7 +131,8 @@ angular.module('gridvizEditor', [])
             link: postLink,
             restrict: 'E',
             scope: {
-                element: '='
+                element: '=',
+                deselect: '&'
             }
         }
     }).service('editorService', function (messageService) {
@@ -123,10 +165,12 @@ angular.module('gridvizEditor', [])
     }).service('messageService', function ($location, $window, $rootScope) {
         var port = $location.port();
         var uri = 'ws://' + $location.host() + (port ? ':' + port : '')
-                    + '/ws/foobar?subscribe-broadcast&publish-broadcast';
+            + '/ws/foobar?subscribe-broadcast&publish-broadcast';
         var ws = new $window.WebSocket(uri);
         // A random 32-bit int as hex
-        var randomHex = function () { return Math.floor(Math.random() * Math.pow(2, 32)).toString(16); };
+        var randomHex = function () {
+            return Math.floor(Math.random() * Math.pow(2, 32)).toString(16);
+        };
         var clientId = this.clientId = randomHex() + randomHex();
 
         var uiMessageName = 'gridviz.ui.message';
