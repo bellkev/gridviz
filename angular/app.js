@@ -50,7 +50,10 @@ angular.module('gridvizEditor', [])
             else if (data.action === 'delete_element') {
                 deleteById(data.id);
             }
-            $scope.$apply();
+            // Apply if an apply isn't already in progress
+            if (!$scope.$$phase) {
+                $scope.$apply();
+            }
         });
 
         $scope.createRect = function () {
