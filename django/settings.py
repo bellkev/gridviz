@@ -90,6 +90,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 )
 
 # Websockets
+WS4REDIS_SUBSCRIBER = 'gridviz.subscriber.DatabaseSubscriber'
 
 WEBSOCKET_URL = '/ws/'
 
