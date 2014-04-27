@@ -13,12 +13,7 @@ angular.module('gridvizEditor', [])
         });
 
         var getElementById = function (id) {
-            var els = $scope.drawing.elements;
-            for (var index = 0; index < els.length; index++) {
-                if (els[index].id === id) {
-                    return els[index];
-                }
-            }
+            return _.find($scope.drawing.elements, {id: id});
         };
 
         var deleteSelected = function () {
@@ -36,6 +31,10 @@ angular.module('gridvizEditor', [])
             _.remove($scope.drawing.elements, {id: id})
         };
 
+        var updateId = function (oldId, newId) {
+            _.find($scope.drawing.elements, {id: oldId}).id = newId;
+        };
+
         messageService.onUiMessage(function (data) {
             if (data.action === 'update_el') {
                 getElementById(data.id).attrs = data.attrs;
@@ -50,6 +49,9 @@ angular.module('gridvizEditor', [])
             else if (data.action === 'delete_element') {
                 deleteById(data.id);
             }
+            else if (data.action === 'update_id') {
+                updateId(data.tempId, data.id);
+            }
             // Apply if an apply isn't already in progress
             if (!$scope.$$phase) {
                 $scope.$apply();
@@ -60,8 +62,7 @@ angular.module('gridvizEditor', [])
             messageService.sendPersistentMessage({
                 action: 'create_element',
                 tagName: 'rect',
-                // TODO: Swap this out for permanent id when available
-                tempId: _.uniqueId(),
+                tempId: messageService.tempId(),
                 attrs: {
                     x: 300,
                     y: 100,
@@ -220,10 +221,25 @@ angular.module('gridvizEditor', [])
         };
         self.clientId = randomHex() + randomHex();
 
+        var tempPrefix = 'temp_';
+        var isTempId = function (id) {
+            return _.isString(id) && id.indexOf(tempPrefix) >= 0;
+        };
+        self.tempId = _.wrap(tempPrefix, _.uniqueId);
+
         ws.onmessage = function (message) {
             var messageData = JSON.parse(message.data);
             if (messageData.clientId !== self.clientId) {
                 $rootScope.$emit(uiOnlyMessageName, messageData);
+            }
+            else if (messageData.action === 'create_element') {
+                // A special action performed only on the client
+                // to upgrade a tempId to a permanent one
+                $rootScope.$emit(uiOnlyMessageName, {
+                    action: 'update_id',
+                    tempId: messageData.tempId,
+                    id: messageData.id
+                })
             }
             if (messageData.messageType === persistentType) {
                 $rootScope.$emit(persistentMessageName, messageData);
@@ -245,9 +261,16 @@ angular.module('gridvizEditor', [])
         };
 
         var sendMessage = function (name, data) {
-            data.clientId = self.clientId;
-            $rootScope.$emit(uiOnlyMessageName, data);
-            ws.send(JSON.stringify(data));
+            if (isTempId(data.id)) {
+                // The tempId/permanent id pair can be cached on the server is this becomes too limiting
+                // (e.g. to allow a rapid-fire create/delete)
+                throw new Error("A tempId can only be used to create elements");
+            }
+            else {
+                data.clientId = self.clientId;
+                $rootScope.$emit(uiOnlyMessageName, data);
+                ws.send(JSON.stringify(data));
+            }
         };
 
         self.sendUiMessage = function (data) {

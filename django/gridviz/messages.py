@@ -25,7 +25,8 @@ def create_element(drawing, message):
             'id': el.pk,
             'attrs': el.get_attrs(),
             'messageType': 'persistent',
-            'clientId': message['clientId']}
+            'clientId': message['clientId'],
+            'tempId': message['tempId']}
 
 
 def delete_element(drawing, message):

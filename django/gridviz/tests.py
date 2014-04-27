@@ -171,12 +171,14 @@ class MessageQueries(SvgTest):
         ])
         create_element_message = json.dumps({'action': 'create_element', 'tagName': 'rect',
                                              'attrs': {'x': 10, 'y': 10, 'width': 10, 'height': 10},
-                                             'messageType': 'persistent', 'clientId': 'abc'})
+                                             'messageType': 'persistent', 'clientId': 'abc',
+                                             'tempId': 'temp_123'})
         result = process_message(self.test_drawing, create_element_message)
         el = SvgElement.objects.first()
         expected = json.dumps({'action': 'create_element', 'tagName': 'rect',
                                'attrs': {'x': 10, 'y': 10, 'width': 10, 'height': 10},
-                               'messageType': 'persistent', 'clientId': 'abc', 'id': el.pk})
+                               'messageType': 'persistent', 'clientId': 'abc', 'id': el.pk,
+                               'tempId': 'temp_123'})
         self.assertJSONEqual(result, expected)
 
     def test_delete_element(self):
