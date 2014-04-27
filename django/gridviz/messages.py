@@ -28,9 +28,15 @@ def create_element(drawing, message):
             'clientId': message['clientId']}
 
 
+def delete_element(drawing, message):
+    el = SvgElement.objects.get(pk=message['id'])
+    el.delete()
+    return message
+
+
 def process_message(drawing, message):
     start = time.clock()
-    allowed_actions = [create_element]
+    allowed_actions = [create_element, delete_element]
     actions_dict = dict((action.__name__, action) for action in allowed_actions)
     message_dict = json.loads(message)
     if message_dict['messageType'] == 'persistent':

@@ -179,6 +179,15 @@ class MessageQueries(SvgTest):
                                'messageType': 'persistent', 'clientId': 'abc', 'id': el.pk})
         self.assertJSONEqual(result, expected)
 
+    def test_delete_element(self):
+        el = SvgElement.objects.create(drawing=self.test_drawing, type=self.test_type)
+        delete_element_message = json.dumps({'action': 'delete_element', 'id': el.pk, 'messageType': 'persistent'})
+        result = process_message(self.test_drawing, delete_element_message)
+        with self.assertRaises(SvgElement.DoesNotExist):
+            SvgElement.objects.get(pk=el.pk)
+            self.assertJSONEqual(result, delete_element_message)
+
+
     # TODO: Reimplement below but for update_element when written
     # def test_drawing_filter(self):
     #     test_element = SvgElement.objects.create(type=self.test_type, drawing=self.test_drawing)

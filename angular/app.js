@@ -6,7 +6,7 @@
  */
 
 angular.module('gridvizEditor', [])
-    .controller('GridvizController', function ($scope, $http, $location, messageService) {
+    .controller('GridvizController', function ($scope, $http, $location, messageService, $document) {
         var url = $location.absUrl().replace(/\/edit.*/, '');
         $http.get(url, {headers: {'X-Requested-With': 'XMLHttpRequest'}}).then(function (response) {
             $scope.drawing = response.data;
@@ -21,6 +21,21 @@ angular.module('gridvizEditor', [])
             }
         };
 
+        var deleteSelected = function () {
+            _.forEach($scope.drawing.elements, function (el) {
+                if (el.selected) {
+                    messageService.sendPersistentMessage({
+                        action: 'delete_element',
+                        id: el.id
+                    })
+                }
+            });
+        };
+
+        var deleteById = function (id) {
+            _.remove($scope.drawing.elements, {id: id})
+        };
+
         messageService.onUiMessage(function (data) {
             if (data.action === 'update_el') {
                 getElementById(data.id).attrs = data.attrs;
@@ -32,6 +47,9 @@ angular.module('gridvizEditor', [])
                     attrs: _.clone(data.attrs)
                 })
             }
+            else if (data.action === 'delete_element') {
+                deleteById(data.id);
+            }
             $scope.$apply();
         });
 
@@ -39,6 +57,7 @@ angular.module('gridvizEditor', [])
             messageService.sendPersistentMessage({
                 action: 'create_element',
                 tagName: 'rect',
+                // TODO: Swap this out for permanent id when available
                 tempId: _.uniqueId(),
                 attrs: {
                     x: 300,
@@ -55,7 +74,13 @@ angular.module('gridvizEditor', [])
                     el.selected = false;
                 });
             }
-        }
+        };
+
+        $document.keydown( function (ev) {
+            if (ev.keyCode === 8) {
+                deleteSelected();
+            }
+        });
     }).directive('panel', function () {
         return {
             templateUrl: '/static/templates/panel.html',
@@ -135,6 +160,11 @@ angular.module('gridvizEditor', [])
 //                scope.$apply();
 //            });
 
+            // Clean up
+            scope.$on('$destroy', function () {
+                _.invoke(corners, 'remove');
+                newEl.remove();
+            });
         };
         return {
             link: postLink,
