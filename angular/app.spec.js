@@ -128,7 +128,6 @@ describe('gridvizEditor', function () {
 
             it('should send a message if moved a grid space', function () {
                 es.drag(rect, {offsetX: 32, offsetY: 32});
-                //expect(rect.attrs.x).toBe(40);
                 expect(lastMessage).toEqual({
                     action : 'update_el',
                     id : 1,
@@ -207,6 +206,50 @@ describe('gridvizEditor', function () {
             it('should not re-broadcast its own (non-persistent) messages', function () {
                 ws.onmessage({data: JSON.stringify(ownServerData)});
                 expect(lastCallbackData).toBeNull();
+            });
+        });
+
+        describe('persistent messages', function () {
+            var ownServerData, otherServerData, clientData, lastCallbackData;
+
+            beforeEach(function () {
+                ms.onPersistentMessage(function (data) {
+                    lastCallbackData = data;
+                });
+                ownServerData = {
+                    foo: 'bar',
+                    clientId: ms.clientId,
+                    messageType: 'persistent'
+                };
+                otherServerData = {
+                    foo: 'bar',
+                    clientId: 'abc',
+                    messageType: 'persistent'
+                };
+                clientData = {
+                    foo: 'bar'
+                };
+                lastCallbackData = null;
+            });
+
+            it('should add id, stringify, tag as persistent message, and send ws messages', function () {
+                ms.sendPersistentMessage(clientData);
+                expect(JSON.parse(lastWsMessage)).toEqual(ownServerData);
+            });
+
+            it('should not locally broadcast persistent messages', function () {
+                ms.sendPersistentMessage(clientData);
+                expect(lastCallbackData).toBeNull();
+            });
+
+            it('should parse and broadcast messages from server to listeners', function () {
+                ws.onmessage({data: JSON.stringify(otherServerData)});
+                expect(lastCallbackData).toEqual(otherServerData);
+            });
+
+            it('should re-broadcast its own persistent messages once received from the server', function () {
+                ws.onmessage({data: JSON.stringify(ownServerData)});
+                expect(lastCallbackData).toEqual(ownServerData);
             });
         });
 
