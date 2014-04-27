@@ -19,7 +19,7 @@ angular.module('gridvizEditor', [])
             }
         };
 
-        messageService.onMessage(function (data) {
+        messageService.onUiMessage(function (data) {
             if (data.action === 'update_el') {
                 getElementById(data.id).attrs = data.attrs;
             }
@@ -34,7 +34,7 @@ angular.module('gridvizEditor', [])
         });
 
         $scope.createRect = function () {
-            messageService.broadcastMessage({
+            messageService.sendUiMessage({
                 action: 'create_el',
                 tagName: 'rect',
                 tempId: _.uniqueId(),
@@ -159,36 +159,61 @@ angular.module('gridvizEditor', [])
             if (!_.isEmpty(diff)) {
                 var newAttrs = _.merge(_.clone(el.attrs), diff);
                 var message = {action: 'update_el', id: el.id, attrs: newAttrs};
-                messageService.broadcastMessage(message);
+                messageService.sendUiMessage(message);
             }
         };
     }).service('messageService', function ($location, $window, $rootScope) {
+        var self = this;
         var port = $location.port();
         var uri = 'ws://' + $location.host() + (port ? ':' + port : '')
             + '/ws/foobar?subscribe-broadcast&publish-broadcast';
         var ws = new $window.WebSocket(uri);
-        // A random 32-bit int as hex
-        var randomHex = function () {
-            return Math.floor(Math.random() * Math.pow(2, 32)).toString(16);
-        };
-        var clientId = this.clientId = randomHex() + randomHex();
+        var uiMessageName = 'gridviz.ui';
+        var persistentMessageName = 'gridviz.persistent';
+        var uiType = 'ui';
+        var persistentType = 'persistent';
 
-        var uiMessageName = 'gridviz.ui.message';
+        var randomHex = function () {
+            return _.random(Math.pow(2, 32)).toString(16);
+        };
+        self.clientId = randomHex() + randomHex();
 
         ws.onmessage = function (message) {
-            $rootScope.$emit(uiMessageName, JSON.parse(message.data));
+            var messageData = JSON.parse(message.data);
+            if (messageData.clientId !== self.clientId && messageData.messageType === uiType) {
+                $rootScope.$emit(uiMessageName, messageData);
+            }
+            else if (messageData.messageType === persistentType) {
+                $rootScope.$emit(persistentMessageName, messageData);
+            }
         };
 
-        this.onMessage = function (handler) {
-            $rootScope.$on(uiMessageName, function (e, data) {
-                if (data.clientId !== clientId) {
-                    handler(data);
-                }
+        var onMessage = function (name, handler) {
+            $rootScope.$on(name, function (e, data) {
+                handler(data);
             });
         };
 
-        this.broadcastMessage = function (data) {
+        self.onUiMessage = function (handler) {
+            onMessage(uiMessageName, handler);
+        };
+
+        self.onPersistentMessage = function (handler) {
+            onMessage(persistentMessageName, handler);
+        };
+
+        var sendMessage = function (name, data) {
+            ws.send(JSON.stringify(_.merge(data, {clientId: self.clientId})));
+        };
+
+        self.sendUiMessage = function (data) {
             $rootScope.$emit(uiMessageName, data);
-            ws.send(JSON.stringify(_.merge(data, {clientId: clientId})));
+            data.messageType = uiType;
+            sendMessage(uiMessageName, data);
+        };
+
+        self.sendPersistentMessage = function (data) {
+            data.messageType = persistentType;
+            sendMessage(persistentMessageName, data);
         };
     });

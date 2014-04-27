@@ -104,7 +104,7 @@ describe('gridvizEditor', function () {
         beforeEach(module('gridvizEditor'));
         beforeEach(module(function ($provide) {
             $provide.value('messageService', {
-                broadcastMessage: function (message) {
+                sendUiMessage: function (message) {
                     lastMessage = message;
                 }
             });
@@ -112,17 +112,16 @@ describe('gridvizEditor', function () {
         beforeEach(inject(function (editorService, $rootScope) {
             es = editorService;
             scope = $rootScope;
-        }));
-        beforeEach(function () {
             rect = { id: 1, tagName: 'rect', attrs: {x: 20, y: 20, width: 20, height: 20} };
             circle = { id: 2, tagName: 'circle', attrs: {cx: 30, cy: 30, r: 10} };
-        });
+            lastMessage = null;
+        }));
 
         describe('drag', function () {
             it('should not change attrs or send a message if moved less than a grid space', function () {
                 es.drag(rect, {offsetX: 22, offsetY: 22});
                 expect(rect.attrs.x).toBe(20);
-                expect(lastMessage).toBeUndefined();
+                expect(lastMessage).toBeNull();
             });
 
             it('should send a message if moved a grid space', function () {
@@ -147,13 +146,14 @@ describe('gridvizEditor', function () {
     });
 
     describe('messageService', function () {
-        var ms, lastMessage, ws, dummyData;
+        var ms, ws, lastWsMessage;
+
         beforeEach(module('gridvizEditor'));
         beforeEach(module(function ($provide) {
             $provide.value('$window', {
                 WebSocket: function (uri) {
                     this.send = function (message) {
-                        lastMessage = message;
+                        lastWsMessage = message;
                     };
                     ws = this;
                 }
@@ -161,40 +161,52 @@ describe('gridvizEditor', function () {
         }));
         beforeEach(inject(function (messageService) {
             ms = messageService;
-            dummyData = {foo: 'bar'};
+            lastWsMessage = undefined;
         }));
 
-        it('should add id, stringify, and send ws messages', function () {
-            ms.broadcastMessage(dummyData);
-            expect(JSON.parse(lastMessage)).toEqual(_.merge(dummyData, {clientId: ms.clientId}));
+        describe('ui messages', function () {
+            var ownServerData, otherServerData, clientData, lastCallbackData;
+
+            beforeEach(function () {
+                ms.onUiMessage(function (data) {
+                    lastCallbackData = data;
+                });
+                ownServerData = {
+                    foo: 'bar',
+                    clientId: ms.clientId,
+                    messageType: 'ui'
+                };
+                otherServerData = {
+                    foo: 'bar',
+                    clientId: 'abc',
+                    messageType: 'ui'
+                };
+                clientData = {
+                    foo: 'bar'
+                };
+                lastCallbackData = null;
+            });
+
+            it('should add id, stringify, tag as ui message, and send ws messages', function () {
+                ms.sendUiMessage(clientData);
+                expect(JSON.parse(lastWsMessage)).toEqual(ownServerData);
+            });
+
+            it('should broadcast local ui messages', function () {
+                ms.sendUiMessage(clientData);
+                expect(lastCallbackData).toBe(clientData);
+            });
+
+            it('should parse and broadcast messages from server to listeners', function () {
+                ws.onmessage({data: JSON.stringify(otherServerData)});
+                expect(lastCallbackData).toEqual(otherServerData);
+            });
+
+            it('should not re-broadcast its own (non-persistent) messages', function () {
+                ws.onmessage({data: JSON.stringify(ownServerData)});
+                expect(lastCallbackData).toBeNull();
+            });
         });
 
-        it('should broadcast local ui messages', function () {
-            var result;
-            ms.onMessage(function (data) {
-                result = data;
-            });
-            ms.broadcastMessage({foo: 'bar'});
-            expect(result.foo).toBe('bar');
-        });
-
-        it('should parse and broadcast messages from server to listeners', function () {
-            var result;
-            ms.onMessage( function (data) {
-                result = data;
-            });
-            ws.onmessage({data: JSON.stringify(dummyData)});
-            expect(result).toEqual(dummyData);
-        });
-
-        it('should not re-broadcast its own (non-persistent) messages', function () {
-            var result;
-            ms.broadcastMessage(dummyData);
-            ms.onMessage(function (message) {
-                result = message;
-            });
-            ws.onmessage({data: lastMessage});
-            expect(result).toBeUndefined();
-        });
     });
 });
