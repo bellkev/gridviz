@@ -103,6 +103,7 @@ angular.module('gridvizEditor', [])
                     {top: 'bottom', left: 'right'}
                 ];
                 _.forEach(corners, function (corner, index) {
+                    // TODO: Make this more efficient (e.g. don't update attrs when hidden) and test
                     corner.css({
                         display: scope.element.selected ? 'block' : 'none',
                         top: pos[mappings[index]['top']],
@@ -170,9 +171,9 @@ angular.module('gridvizEditor', [])
         var uri = 'ws://' + $location.host() + (port ? ':' + port : '')
             + '/ws/foobar?subscribe-broadcast&publish-broadcast';
         var ws = new $window.WebSocket(uri);
-        var uiMessageName = 'gridviz.ui';
+        var uiOnlyMessageName = 'gridviz.ui';
         var persistentMessageName = 'gridviz.persistent';
-        var uiType = 'ui';
+        var uiOnlyType = 'ui';
         var persistentType = 'persistent';
 
         var randomHex = function () {
@@ -182,10 +183,10 @@ angular.module('gridvizEditor', [])
 
         ws.onmessage = function (message) {
             var messageData = JSON.parse(message.data);
-            if (messageData.clientId !== self.clientId && messageData.messageType === uiType) {
-                $rootScope.$emit(uiMessageName, messageData);
+            if (messageData.clientId !== self.clientId) {
+                $rootScope.$emit(uiOnlyMessageName, messageData);
             }
-            else if (messageData.messageType === persistentType) {
+            if (messageData.messageType === persistentType) {
                 $rootScope.$emit(persistentMessageName, messageData);
             }
         };
@@ -197,7 +198,7 @@ angular.module('gridvizEditor', [])
         };
 
         self.onUiMessage = function (handler) {
-            onMessage(uiMessageName, handler);
+            onMessage(uiOnlyMessageName, handler);
         };
 
         self.onPersistentMessage = function (handler) {
@@ -205,13 +206,14 @@ angular.module('gridvizEditor', [])
         };
 
         var sendMessage = function (name, data) {
-            ws.send(JSON.stringify(_.merge(data, {clientId: self.clientId})));
+            data.clientId = self.clientId;
+            $rootScope.$emit(uiOnlyMessageName, data);
+            ws.send(JSON.stringify(data));
         };
 
         self.sendUiMessage = function (data) {
-            $rootScope.$emit(uiMessageName, data);
-            data.messageType = uiType;
-            sendMessage(uiMessageName, data);
+            data.messageType = uiOnlyType;
+            sendMessage(uiOnlyMessageName, data);
         };
 
         self.sendPersistentMessage = function (data) {

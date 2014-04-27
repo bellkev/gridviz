@@ -169,6 +169,7 @@ describe('gridvizEditor', function () {
             var ownServerData, otherServerData, clientData, lastCallbackData;
 
             beforeEach(function () {
+                lastCallbackData = null;
                 ms.onUiMessage(function (data) {
                     lastCallbackData = data;
                 });
@@ -185,7 +186,6 @@ describe('gridvizEditor', function () {
                 clientData = {
                     foo: 'bar'
                 };
-                lastCallbackData = null;
             });
 
             it('should add id, stringify, tag as ui message, and send ws messages', function () {
@@ -195,7 +195,7 @@ describe('gridvizEditor', function () {
 
             it('should broadcast local ui messages', function () {
                 ms.sendUiMessage(clientData);
-                expect(lastCallbackData).toBe(clientData);
+                expect(lastCallbackData).toEqual(ownServerData);
             });
 
             it('should parse and broadcast messages from server to listeners', function () {
@@ -203,18 +203,23 @@ describe('gridvizEditor', function () {
                 expect(lastCallbackData).toEqual(otherServerData);
             });
 
-            it('should not re-broadcast its own (non-persistent) messages', function () {
+            it('should not re-broadcast its own ui messages', function () {
                 ws.onmessage({data: JSON.stringify(ownServerData)});
                 expect(lastCallbackData).toBeNull();
             });
         });
 
         describe('persistent messages', function () {
-            var ownServerData, otherServerData, clientData, lastCallbackData;
+            var ownServerData, otherServerData, clientData, lastPersistentCallbackData, lastUiCallbackData;
 
             beforeEach(function () {
+                lastPersistentCallbackData = null;
+                lastUiCallbackData = null;
                 ms.onPersistentMessage(function (data) {
-                    lastCallbackData = data;
+                    lastPersistentCallbackData = data;
+                });
+                ms.onUiMessage(function (data) {
+                    lastUiCallbackData = data;
                 });
                 ownServerData = {
                     foo: 'bar',
@@ -229,7 +234,6 @@ describe('gridvizEditor', function () {
                 clientData = {
                     foo: 'bar'
                 };
-                lastCallbackData = null;
             });
 
             it('should add id, stringify, tag as persistent message, and send ws messages', function () {
@@ -237,19 +241,20 @@ describe('gridvizEditor', function () {
                 expect(JSON.parse(lastWsMessage)).toEqual(ownServerData);
             });
 
-            it('should not locally broadcast persistent messages', function () {
+            it('should locally broadcast persistent messages for the ui but not for the persistent cache', function () {
                 ms.sendPersistentMessage(clientData);
-                expect(lastCallbackData).toBeNull();
+                expect(lastUiCallbackData).toEqual(ownServerData);
+                expect(lastPersistentCallbackData).toBeNull();
             });
 
             it('should parse and broadcast messages from server to listeners', function () {
                 ws.onmessage({data: JSON.stringify(otherServerData)});
-                expect(lastCallbackData).toEqual(otherServerData);
+                expect(lastPersistentCallbackData).toEqual(otherServerData);
             });
 
             it('should re-broadcast its own persistent messages once received from the server', function () {
                 ws.onmessage({data: JSON.stringify(ownServerData)});
-                expect(lastCallbackData).toEqual(ownServerData);
+                expect(lastPersistentCallbackData).toEqual(ownServerData);
             });
         });
 
