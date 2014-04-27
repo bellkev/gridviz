@@ -25,7 +25,7 @@ angular.module('gridvizEditor', [])
             if (data.action === 'update_el') {
                 getElementById(data.id).attrs = data.attrs;
             }
-            else if (data.action === 'create_el') {
+            else if (data.action === 'create_element') {
                 $scope.drawing.elements.push({
                     id: data.id || data.tempId,
                     tagName: data.tagName,
@@ -36,8 +36,8 @@ angular.module('gridvizEditor', [])
         });
 
         $scope.createRect = function () {
-            messageService.sendUiMessage({
-                action: 'create_el',
+            messageService.sendPersistentMessage({
+                action: 'create_element',
                 tagName: 'rect',
                 tempId: _.uniqueId(),
                 attrs: {
@@ -129,6 +129,12 @@ angular.module('gridvizEditor', [])
                 editorService.drag(scope.element, {offsetX: dd.offsetX, offsetY: dd.offsetY});
                 scope.$apply();
             });
+
+//            newEl.dragend(function (ev, dd) {
+//                editorService.drag(scope.element, {offsetX: dd.offsetX, offsetY: dd.offsetY});
+//                scope.$apply();
+//            });
+
         };
         return {
             link: postLink,

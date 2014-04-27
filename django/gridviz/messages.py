@@ -2,8 +2,13 @@
 # See the file LICENSE.txt for copying permission.
 
 import json
+import time
 
 from .models import SvgDatumBase, SvgElement, SvgAttribute, SvgElementType
+
+
+def datum_class_for_attr(attr):
+    return [c for c in SvgDatumBase.__subclasses__() if c.data_type == attr.data_type][0]
 
 
 def create_element(drawing, message):
@@ -13,8 +18,7 @@ def create_element(drawing, message):
     el.save()
     for key in attr_dict:
         attr = SvgAttribute.objects.get(name=key)
-        datum_class = [c for c in SvgDatumBase.__subclasses__() if c.data_type is attr.data_type][0]
-        datum = datum_class(element=el, attribute=attr, value=attr_dict[key])
+        datum = datum_class_for_attr(attr)(element=el, attribute=attr, value=attr_dict[key])
         datum.save()
     return {'action': 'create_element',
             'tagName': el.type.name,
@@ -25,8 +29,14 @@ def create_element(drawing, message):
 
 
 def process_message(drawing, message):
+    start = time.clock()
     allowed_actions = [create_element]
     actions_dict = dict((action.__name__, action) for action in allowed_actions)
     message_dict = json.loads(message)
-    result_dict = actions_dict[message_dict['action']](drawing, message_dict)
-    return json.dumps(result_dict)
+    if message_dict['messageType'] == 'persistent':
+        result_dict = actions_dict[message_dict['action']](drawing, message_dict)
+        result = json.dumps(result_dict)
+    else:
+        result = message
+    print 'Processed', message_dict['messageType'], 'action in', time.clock() - start, 'seconds'
+    return result
