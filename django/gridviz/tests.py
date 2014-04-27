@@ -15,7 +15,6 @@ class SvgTest(TestCase):
         self.test_drawing = Drawing.objects.create(title='test_drawing')
         self.test_type = SvgElementType.objects.create(name='test_type')
         self.test_attr = SvgAttribute.objects.create(name='test_attr', data_type=svg_data_types.FLOAT_TYPE)
-        self.test_element = SvgElement.objects.create(type=self.test_type, drawing=self.test_drawing)
 
 
 class DrawingModelTest(SvgTest):
@@ -28,6 +27,7 @@ class DrawingModelTest(SvgTest):
         self.assertEqual(drawing.get_absolute_url(), '/drawings/' + str(drawing.pk))
 
     def test_get_elements(self):
+        test_element = SvgElement.objects.create(type=self.test_type, drawing=self.test_drawing)
         el1 = SvgElement.objects.create(type=self.test_type, drawing=self.test_drawing)
         el2 = SvgElement.objects.create(type=self.test_type, drawing=self.test_drawing)
         el3 = SvgElement.objects.create(type=self.test_type, drawing=self.test_drawing)
@@ -40,7 +40,7 @@ class DrawingModelTest(SvgTest):
 
         with self.assertNumQueries(2):
             self.assertEqual(self.test_drawing.get_elements(),
-                             [{'id': self.test_element.pk, 'tagName': 'test_type', 'attrs': {}},
+                             [{'id': test_element.pk, 'tagName': 'test_type', 'attrs': {}},
                               {'id': el1.pk, 'tagName': 'test_type', 'attrs': {'test_attr': 1}},
                               {'id': el2.pk, 'tagName': 'test_type', 'attrs': {'test_attr': 2}},
                               {'id': el3.pk, 'tagName': 'test_type', 'attrs': {'attr_2': 4, 'attr_1': 3}}])
@@ -48,23 +48,26 @@ class DrawingModelTest(SvgTest):
 
 class SvgElementModelTest(SvgTest):
     def test_get_attrs(self):
+        test_element = SvgElement.objects.create(type=self.test_type, drawing=self.test_drawing)
         attr_1 = SvgAttribute.objects.create(name='attr_1', data_type=svg_data_types.FLOAT_TYPE)
         attr_2 = SvgAttribute.objects.create(name='attr_2', data_type=svg_data_types.FLOAT_TYPE)
-        SvgFloatDatum.objects.create(element=self.test_element, attribute=attr_1, value=1)
-        SvgFloatDatum.objects.create(element=self.test_element, attribute=attr_2, value=2)
+        SvgFloatDatum.objects.create(element=test_element, attribute=attr_1, value=1)
+        SvgFloatDatum.objects.create(element=test_element, attribute=attr_2, value=2)
         with self.assertNumQueries(1):
-            self.assertEqual(self.test_element.get_attrs(), {'attr_1': 1, 'attr_2': 2})
+            self.assertEqual(test_element.get_attrs(), {'attr_1': 1, 'attr_2': 2})
 
 
 class SvgFloatDatumModelTest(SvgTest):
     def test_length(self):
-        SvgFloatDatum.objects.create(element=self.test_element, attribute=self.test_attr, value=12.5)
+        test_element = SvgElement.objects.create(type=self.test_type, drawing=self.test_drawing)
+        SvgFloatDatum.objects.create(element=test_element, attribute=self.test_attr, value=12.5)
         self.assertEqual(SvgElement.objects.first().data.first().svgfloatdatum.value, 12.5)
 
 
 class SvgCharDatumModelTest(SvgTest):
     def test_length(self):
-        SvgCharDatum.objects.create(element=self.test_element, attribute=self.test_attr, value='abc')
+        test_element = SvgElement.objects.create(type=self.test_type, drawing=self.test_drawing)
+        SvgCharDatum.objects.create(element=test_element, attribute=self.test_attr, value='abc')
         self.assertEqual(SvgElement.objects.first().data.first().svgchardatum.value, 'abc')
 
 
@@ -157,17 +160,29 @@ class DrawingDeleteTests(TestCase):
 class MessageQueries(SvgTest):
     def setUp(self):
         super(MessageQueries, self).setUp()
-        self.test_message = json.dumps({'action': 'add_attr', 'element_id': self.test_element.pk,
-                                        'temp_id': 123, 'attr_name': 'test_attr', 'attr_value': 25})
 
-    def test_create(self):
-        result = process_message(self.test_drawing, self.test_message)
-        datum = SvgFloatDatum.objects.first()
-        expected = json.dumps({'action': 'add_attr', 'element_id': self.test_element.pk, 'temp_id': 123,
-                               'id': datum.pk, 'attr_name': 'test_attr', 'attr_value': 25})
-        self.assertEqual(SvgFloatDatum.objects.first().value, 25)
-        self.assertEqual(expected, result)
+    def test_create_element(self):
+        SvgElementType.objects.create(name='rect')
+        SvgAttribute.objects.bulk_create([
+            SvgAttribute(name='x', data_type=svg_data_types.FLOAT_TYPE),
+            SvgAttribute(name='y', data_type=svg_data_types.FLOAT_TYPE),
+            SvgAttribute(name='width', data_type=svg_data_types.FLOAT_TYPE),
+            SvgAttribute(name='height', data_type=svg_data_types.FLOAT_TYPE)
+        ])
+        create_element_message = json.dumps({'action': 'create_element', 'tagName': 'rect',
+                                             'attrs': {'x': 10, 'y': 10, 'width': 10, 'height': 10},
+                                             'messageType': 'persistent', 'clientId': 'abc'})
+        result = process_message(self.test_drawing, create_element_message)
+        el = SvgElement.objects.first()
+        expected = json.dumps({'action': 'create_element', 'tagName': 'rect',
+                               'attrs': {'x': 10, 'y': 10, 'width': 10, 'height': 10},
+                               'messageType': 'persistent', 'clientId': 'abc', 'id': el.pk})
+        self.assertJSONEqual(result, expected)
 
-    def test_drawing_filter(self):
-        with self.assertRaises(SvgElement.DoesNotExist):
-            process_message(Drawing.objects.create(title='foo'), self.test_message)
+    # TODO: Reimplement below but for update_element when written
+    # def test_drawing_filter(self):
+    #     test_element = SvgElement.objects.create(type=self.test_type, drawing=self.test_drawing)
+    #     test_message = json.dumps({'action': 'add_attr', 'element_id': test_element.pk,
+    #                                'temp_id': 123, 'attr_name': 'test_attr', 'attr_value': 25})
+    #     with self.assertRaises(SvgElement.DoesNotExist):
+    #         process_message(Drawing.objects.create(title='foo'), test_message)
