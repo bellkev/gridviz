@@ -208,8 +208,9 @@ angular.module('gridvizEditor', [])
     }).service('messageService', function ($location, $window, $rootScope) {
         var self = this;
         var port = $location.port();
+        var drawingId = $location.absUrl().match(/\/drawings\/(\d*)\//)[1];
         var uri = 'ws://' + $location.host() + (port ? ':' + port : '')
-            + '/ws/foobar?subscribe-broadcast&publish-broadcast';
+            + '/ws/' + drawingId + '?subscribe-broadcast&publish-broadcast';
         var ws = new $window.WebSocket(uri);
         var uiOnlyMessageName = 'gridviz.ui';
         var persistentMessageName = 'gridviz.persistent';
