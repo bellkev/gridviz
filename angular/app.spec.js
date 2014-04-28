@@ -7,26 +7,29 @@
 
 describe('gridvizEditor', function () {
 
-    beforeEach(module(function ($provide) {
-        $provide.value('$window', {
+    beforeEach(module({
+        $window: {
             WebSocket: function (url) {
-                this.send = function (message) {};
-            }
-        });
+                this.send = _.noop;
+            }},
+        $location: {
+            absUrl: function () {
+                return  "http://www.gridviz.com/drawings/5/edit"
+            },
+            port: _.constant(8000),
+            host: _.constant('localhost')
+        }
     }));
 
     describe('GridvizController', function () {
-        var scope, backend, loc, createController;
+        var scope, backend, createController;
 
         beforeEach(module('gridvizEditor'));
         beforeEach(inject(function ($httpBackend, $controller) {
             backend = $httpBackend;
-            loc = { absUrl: function () {
-                return  "http://www.gridviz.com/drawings/5/edit"
-            }};
             scope = {};
-            createController = function() {
-                return $controller('GridvizController', {'$scope': scope, '$location': loc});
+            createController = function () {
+                return $controller('GridvizController', {'$scope': scope});
             };
         }));
 
@@ -61,7 +64,7 @@ describe('gridvizEditor', function () {
         }));
         beforeEach(inject(function ($compile, $rootScope) {
             scope = $rootScope;
-            scope.el =  { tagName: 'rect', attrs: { x: 10, y: 10, width: 10, height: 10 } };
+            scope.el = { tagName: 'rect', attrs: { x: 10, y: 10, width: 10, height: 10 } };
             el = angular.element('<svg><svg-element element="el"></svg-element></svg>');
             angular.element('body').append(el);
             $compile(el)(scope);
@@ -129,18 +132,18 @@ describe('gridvizEditor', function () {
             it('should send a message if moved a grid space', function () {
                 es.drag(rect, {offsetX: 32, offsetY: 32});
                 expect(lastMessage).toEqual({
-                    action : 'update_el',
-                    id : 1,
-                    attrs : { x: 40, y: 40, width: 20, height: 20 }
+                    action: 'update_el',
+                    id: 1,
+                    attrs: { x: 40, y: 40, width: 20, height: 20 }
                 });
             });
 
             it('should handle circle attrs', function () {
                 es.drag(circle, {offsetX: 32, offsetY: 32});
                 expect(lastMessage).toEqual({
-                    action : 'update_el',
-                    id : 2,
-                    attrs : { cx: 50, cy: 50, r:10 }
+                    action: 'update_el',
+                    id: 2,
+                    attrs: { cx: 50, cy: 50, r: 10 }
                 });
             });
         });
