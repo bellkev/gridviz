@@ -132,7 +132,7 @@ describe('gridvizEditor', function () {
             it('should send a message if moved a grid space', function () {
                 es.drag(rect, {offsetX: 32, offsetY: 32});
                 expect(lastMessage).toEqual({
-                    action: 'update_el',
+                    action: 'update_element',
                     id: 1,
                     attrs: { x: 40, y: 40, width: 20, height: 20 }
                 });
@@ -141,7 +141,7 @@ describe('gridvizEditor', function () {
             it('should handle circle attrs', function () {
                 es.drag(circle, {offsetX: 32, offsetY: 32});
                 expect(lastMessage).toEqual({
-                    action: 'update_el',
+                    action: 'update_element',
                     id: 2,
                     attrs: { cx: 50, cy: 50, r: 10 }
                 });

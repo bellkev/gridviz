@@ -36,7 +36,7 @@ angular.module('gridvizEditor', [])
         };
 
         messageService.onUiMessage(function (data) {
-            if (data.action === 'update_el') {
+            if (data.action === 'update_element') {
                 getElementById(data.id).attrs = data.attrs;
             }
             else if (data.action === 'create_element') {
@@ -155,14 +155,14 @@ angular.module('gridvizEditor', [])
 
             // Make draggable
             newEl.drag(function (ev, dd) {
-                editorService.drag(scope.element, {offsetX: dd.offsetX, offsetY: dd.offsetY});
+                editorService.drag(scope.element, {offsetX: dd.offsetX, offsetY: dd.offsetY}, false);
                 scope.$apply();
             });
 
-//            newEl.dragend(function (ev, dd) {
-//                editorService.drag(scope.element, {offsetX: dd.offsetX, offsetY: dd.offsetY});
-//                scope.$apply();
-//            });
+            newEl.drag('end', function (ev, dd) {
+                editorService.drag(scope.element, {offsetX: dd.offsetX, offsetY: dd.offsetY}, true);
+                scope.$apply();
+            });
 
             // Clean up
             scope.$on('$destroy', function () {
@@ -179,7 +179,7 @@ angular.module('gridvizEditor', [])
             }
         }
     }).service('editorService', function (messageService) {
-        this.drag = function (el, dd) {
+        this.drag = function (el, dd, persistent) {
             var xGrid = Math.round(dd.offsetX / 20) * 20;
             var yGrid = Math.round(dd.offsetY / 20) * 20;
 
@@ -198,10 +198,12 @@ angular.module('gridvizEditor', [])
             var diff = _.pick(toUpdate, function (val, key) {
                 return val !== el.attrs[key];
             });
+            var newAttrs = _.merge(_.clone(el.attrs), diff);
+            var message = {action: 'update_element', id: el.id, attrs: newAttrs};
 
-            if (!_.isEmpty(diff)) {
-                var newAttrs = _.merge(_.clone(el.attrs), diff);
-                var message = {action: 'update_el', id: el.id, attrs: newAttrs};
+            if (persistent) {
+                messageService.sendPersistentMessage(message)
+            } else if (!_.isEmpty(diff)) {
                 messageService.sendUiMessage(message);
             }
         };
