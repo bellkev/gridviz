@@ -13,9 +13,7 @@ describe('gridvizEditor', function () {
                 this.send = _.noop;
             }},
         $location: {
-            absUrl: function () {
-                return  "http://www.gridviz.com/drawings/5/edit"
-            },
+            absUrl: _.constant('http://www.gridviz.com/drawings/5/edit'),
             port: _.constant(8000),
             host: _.constant('localhost')
         }
