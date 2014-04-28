@@ -102,8 +102,6 @@ class ProjectTests(TestCase):
 
 
 class DrawingListTests(TestCase):
-    """Test that drawings show up"""
-
     def test_one_drawing(self):
         Drawing.objects.create(title='1-title')
         response = self.client.get('/drawings/')
@@ -142,7 +140,7 @@ class DrawingUpdateTests(TestCase):
 
     def test_html(self):
         response = self.client.get('/drawings/' + str(self.new_drawing.pk))
-        self.assertContains(response, "Edit Drawing")
+        self.assertContains(response, 'Edit Drawing')
 
     def test_json(self):
         response = self.client.get('/drawings/' + str(self.new_drawing.pk),
@@ -157,43 +155,64 @@ class DrawingDeleteTests(TestCase):
         self.assertRaises(Drawing.DoesNotExist, Drawing.objects.get, pk=new_drawing.pk)
 
 
-class MessageQueries(SvgTest):
+class MessageTestCase(TestCase):
     def setUp(self):
-        super(MessageQueries, self).setUp()
-
-    def test_create_element(self):
-        SvgElementType.objects.create(name='rect')
+        self.test_drawing = Drawing.objects.create(title='test_drawing')
+        self.other_test_drawing = Drawing.objects.create(title='other_test_drawing')
+        self.rect_type = SvgElementType.objects.create(name='rect')
         SvgAttribute.objects.bulk_create([
             SvgAttribute(name='x', data_type=svg_data_types.FLOAT_TYPE),
             SvgAttribute(name='y', data_type=svg_data_types.FLOAT_TYPE),
             SvgAttribute(name='width', data_type=svg_data_types.FLOAT_TYPE),
             SvgAttribute(name='height', data_type=svg_data_types.FLOAT_TYPE)
         ])
-        create_element_message = json.dumps({'action': 'create_element', 'tagName': 'rect',
-                                             'attrs': {'x': 10, 'y': 10, 'width': 10, 'height': 10},
-                                             'messageType': 'persistent', 'clientId': 'abc',
-                                             'tempId': 'temp_123'})
-        result = process_message(self.test_drawing, create_element_message)
-        el = SvgElement.objects.first()
-        expected = json.dumps({'action': 'create_element', 'tagName': 'rect',
-                               'attrs': {'x': 10, 'y': 10, 'width': 10, 'height': 10},
-                               'messageType': 'persistent', 'clientId': 'abc', 'id': el.pk,
-                               'tempId': 'temp_123'})
+        self.test_create_message = {'action': 'create_element', 'tagName': 'rect',
+                                    'attrs': {'x': 10, 'y': 10, 'width': 10, 'height': 10},
+                                    'messageType': 'persistent', 'clientId': 'abc',
+                                    'tempId': 'temp_123'}
+
+
+class EditMessageTestCase(MessageTestCase):
+    def setUp(self):
+        super(EditMessageTestCase, self).setUp()
+        self.test_element = SvgElement.objects.create(drawing=self.test_drawing, type=self.rect_type)
+        self.test_update_message = self.test_create_message.copy()
+        self.test_update_message['attrs'] = {'x': 20, 'y': 20, 'width': 10, 'height': 10}
+        self.test_update_message['action'] = 'update_element'
+        self.test_update_message['id'] = self.test_element.pk
+        self.test_delete_message = {'action': 'delete_element', 'id': self.test_element.pk,
+                                    'messageType': 'persistent'}
+
+
+class CreateMessages(MessageTestCase):
+    def test_create_element(self):
+        result = process_message(self.test_drawing, json.dumps(self.test_create_message))
+        self.test_create_message['id'] = SvgElement.objects.first().pk
+        expected = json.dumps(self.test_create_message)
         self.assertJSONEqual(result, expected)
 
-    def test_delete_element(self):
-        el = SvgElement.objects.create(drawing=self.test_drawing, type=self.test_type)
-        delete_element_message = json.dumps({'action': 'delete_element', 'id': el.pk, 'messageType': 'persistent'})
-        result = process_message(self.test_drawing, delete_element_message)
+
+class UpdateMessages(EditMessageTestCase):
+    def test_update_element(self):
+        result = process_message(self.test_drawing, json.dumps(self.test_update_message))
+        self.assertJSONEqual(result, json.dumps(self.test_update_message))
+        self.assertEqual(self.test_update_message['attrs'], self.test_element.get_attrs())
+
+    def test_update_drawing_filter(self):
         with self.assertRaises(SvgElement.DoesNotExist):
-            SvgElement.objects.get(pk=el.pk)
-            self.assertJSONEqual(result, delete_element_message)
+            process_message(self.other_test_drawing, json.dumps(self.test_update_message))
 
 
-    # TODO: Reimplement below but for update_element when written
-    # def test_drawing_filter(self):
-    #     test_element = SvgElement.objects.create(type=self.test_type, drawing=self.test_drawing)
-    #     test_message = json.dumps({'action': 'add_attr', 'element_id': test_element.pk,
-    #                                'temp_id': 123, 'attr_name': 'test_attr', 'attr_value': 25})
-    #     with self.assertRaises(SvgElement.DoesNotExist):
-    #         process_message(Drawing.objects.create(title='foo'), test_message)
+class DeleteMessages(EditMessageTestCase):
+    def setUp(self):
+        super(DeleteMessages, self).setUp()
+
+    def test_delete_element(self):
+        result = process_message(self.test_drawing, json.dumps(self.test_delete_message))
+        self.assertJSONEqual(result, json.dumps(self.test_delete_message))
+        with self.assertRaises(SvgElement.DoesNotExist):
+            SvgElement.objects.get(pk=self.test_element.pk)
+
+    def test_delete_drawing_filter(self):
+        with self.assertRaises(SvgElement.DoesNotExist):
+            process_message(self.other_test_drawing, json.dumps(self.test_delete_message))
