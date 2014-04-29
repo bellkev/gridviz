@@ -186,7 +186,7 @@ class EditMessageTestCase(MessageTestCase):
 
 class CreateMessages(MessageTestCase):
     def test_create_element(self):
-        result = process_message(self.test_drawing, json.dumps(self.test_create_message))
+        result = process_message(self.test_drawing.pk, json.dumps(self.test_create_message))
         self.test_create_message['id'] = SvgElement.objects.first().pk
         expected = json.dumps(self.test_create_message)
         self.assertJSONEqual(result, expected)

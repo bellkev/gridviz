@@ -51,6 +51,7 @@ angular.module('gridvizEditor', [])
             }
             else if (data.action === 'update_id') {
                 updateId(data.tempId, data.id);
+                console.log("Updated element with tempId:", data.tempId, "To:", data.id);
             }
             // Apply if an apply isn't already in progress
             if (!$scope.$$phase) {
@@ -59,7 +60,7 @@ angular.module('gridvizEditor', [])
         });
 
         $scope.createRect = function () {
-            messageService.sendPersistentMessage({
+            var message = {
                 action: 'create_element',
                 tagName: 'rect',
                 tempId: messageService.tempId(),
@@ -69,7 +70,9 @@ angular.module('gridvizEditor', [])
                     width: 40,
                     height: 40
                 }
-            })
+            };
+            console.log("Created element with tempId:", message.tempId);
+            messageService.sendPersistentMessage(message);
         };
 
         $scope.deselectAll = function (ev) {
@@ -87,7 +90,7 @@ angular.module('gridvizEditor', [])
         });
     }).directive('panel', function () {
         return {
-            templateUrl: '/static/templates/panel.html',
+            templateUrl: '/templates/panel.html',
             restrict: 'E',
             transclude: true,
             scope: {},
@@ -247,6 +250,16 @@ angular.module('gridvizEditor', [])
             if (messageData.messageType === persistentType) {
                 $rootScope.$emit(persistentMessageName, messageData);
             }
+        };
+
+        var wsTime;
+        ws.onopen = function () {
+            wsTime = Date.now();
+            console.log('Websocket open');
+        };
+
+        ws.onclose = function () {
+            console.log('Websocket closed after', Date.now() - wsTime, 'ms');
         };
 
         var onMessage = function (name, handler) {
