@@ -1,8 +1,16 @@
+# JetBrains files
 /.idea/
 *.iml
+
+# Generated static files
 /static/
-db.sqlite3
+
+# Node/Angular/JS stuff
 /node_modules/
 /bower_components/
+/coverage/
+
+# Python/Django stuff
 *.pyc
 .coverage
+db.sqlite3
