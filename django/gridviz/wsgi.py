@@ -6,7 +6,7 @@ import pymysql
 pymysql.install_as_MySQLdb()
 
 import os
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'gridviz.settings.base')
 from django.conf import settings
 from django.core.wsgi import get_wsgi_application
 from ws4redis.uwsgi_runserver import uWSGIWebsocketServer

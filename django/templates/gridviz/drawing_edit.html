@@ -2,6 +2,7 @@
 {# See the file LICENSE.txt for copying permission. #}
 
 {% extends "gridviz/base.html" %}
+{% load static %}
 {% load staticfiles %}
 
 {% block content %}
@@ -36,5 +37,12 @@
 
     <!-- app -->
     <script src="{% static "app.js" %}"></script>
+
+    <!-- config variables -->
+    <script>
+        window.serverData = {
+            templatePrefix: '{%  get_static_prefix %}'
+        }
+    </script>
 
 {% endblock %}

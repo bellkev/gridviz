@@ -1,10 +1,17 @@
 # Copyright (c) 2014 Kevin Bell. All rights reserved.
 # See the file LICENSE.txt for copying permission.
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-import os
+# Build paths inside the project like this: join(BASE_DIR, ...)
+from os.path import dirname, join
 
-BASE_DIR = os.path.dirname(__file__)
+# The python module named 'gridviz'
+MODULE_ROOT = dirname(dirname(__file__))
+
+# The root of the django project, where manage.py lives
+PROJECT_ROOT = dirname(MODULE_ROOT)
+
+# All of gridviz, where README is
+SYSTEM_ROOT = dirname(PROJECT_ROOT)
 
 
 # Quick-start development settings - unsuitable for production
@@ -44,24 +51,9 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'urls'
+ROOT_URLCONF = 'gridviz.urls'
 
 WSGI_APPLICATION = 'ws4redis.django_runserver.application'
-
-
-# Database
-# https://docs.djangoproject.com/en/dev/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        # 'ENGINE': 'django.db.backends.sqlite3',
-        # 'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gridviz',
-        'USER': 'root',
-        'PASSWORD': ''
-    }
-}
 
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
@@ -80,18 +72,24 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/dev/howto/static-files/
 
-STATIC_URL = '/'
+STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, '../static'),
-    os.path.join(BASE_DIR, '../bower_components'),
-    os.path.join(BASE_DIR, '../angular'),
+    join(SYSTEM_ROOT, 'static'),
+    join(SYSTEM_ROOT, 'bower_components'),
+    join(SYSTEM_ROOT, 'angular'),
 )
+
+STATIC_ROOT = join(SYSTEM_ROOT, 'collected_static')
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
     'django.core.context_processors.static',
     'ws4redis.context_processors.default',
+)
+
+TEMPLATE_DIRS = (
+    join(PROJECT_ROOT, 'templates'),
 )
 
 LOGGING = {
@@ -126,9 +124,5 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         'LOCATION': 'default'
-    },
-    'svg_names': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'svg_names'
     }
 }

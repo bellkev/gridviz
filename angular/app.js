@@ -88,9 +88,9 @@ angular.module('gridvizEditor', [])
                 deleteSelected();
             }
         });
-    }).directive('panel', function () {
+    }).directive('panel', function ($window) {
         return {
-            templateUrl: '/templates/panel.html',
+            templateUrl: $window.serverData.templatePrefix + 'ngtemplates/panel.html',
             restrict: 'E',
             transclude: true,
             scope: {},

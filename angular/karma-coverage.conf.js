@@ -17,7 +17,7 @@ module.exports = function (config) {
         reporters: ['coverage', 'dots'],
         coverageReporter: {
             type : 'lcovonly',
-            dir : 'coverage/'
+            dir : 'angular/coverage/'
         }
     });
 };
