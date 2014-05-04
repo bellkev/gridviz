@@ -47,6 +47,7 @@ def process_message(drawing_id, message):
     allowed_actions = [create_element, update_element, delete_element]
     actions_dict = dict((action.__name__, action) for action in allowed_actions)
     message_dict = json.loads(message)
+    # TODO: Move persistence check logic above the storage layer
     if message_dict['messageType'] == 'persistent':
         result_dict = actions_dict[message_dict['action']](drawing_id, message_dict)
         result = json.dumps(result_dict)

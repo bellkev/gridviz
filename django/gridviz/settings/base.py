@@ -116,7 +116,10 @@ LOGGING = {
 }
 
 # Websockets
+
 WS4REDIS_SUBSCRIBER = 'gridviz.subscriber.DatabaseSubscriber'
+
+WS4REDIS_EXPIRE = 0
 
 WEBSOCKET_URL = '/ws/'
 
@@ -126,3 +129,7 @@ CACHES = {
         'LOCATION': 'default'
     }
 }
+
+# SVG Store
+
+SVG_STORE = 'gridviz'

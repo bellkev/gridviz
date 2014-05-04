@@ -1,4 +1,5 @@
 [run]
 source = gridviz
-omit = django/gridviz/tests.py, django/gridviz/benchmarks.py, django/gridviz/monkey_business.py
+omit = django/gridviz/tests.py, django/gridviz/benchmarks.py, django/gridviz/monkey_business.py,
+       django/gridviz/test_svg_store/*
 branch = True
