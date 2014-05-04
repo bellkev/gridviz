@@ -3,7 +3,7 @@
 
 import json
 
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 from gridviz import svg_data_types
 
 from .models import Drawing, SvgElementType, SvgElement, SvgAttribute, SvgFloatDatum, SvgCharDatum
@@ -155,7 +155,7 @@ class DrawingDeleteTests(TestCase):
         self.assertRaises(Drawing.DoesNotExist, Drawing.objects.get, pk=new_drawing.pk)
 
 
-class MessageTestCase(TestCase):
+class MessageTestCase(TransactionTestCase):
     def setUp(self):
         self.test_drawing = Drawing.objects.create(title='test_drawing')
         self.other_test_drawing = Drawing.objects.create(title='other_test_drawing')
@@ -175,13 +175,16 @@ class MessageTestCase(TestCase):
 class EditMessageTestCase(MessageTestCase):
     def setUp(self):
         super(EditMessageTestCase, self).setUp()
-        self.test_element = SvgElement.objects.create(drawing=self.test_drawing, type=self.rect_type)
+        result = process_message(self.test_drawing.pk, json.dumps(self.test_create_message))
+        self.test_element = SvgElement.objects.get(pk=json.loads(result)['id'])
         self.test_update_message = self.test_create_message.copy()
         self.test_update_message['attrs'] = {'x': 20, 'y': 20, 'width': 10, 'height': 10}
         self.test_update_message['action'] = 'update_element'
         self.test_update_message['id'] = self.test_element.pk
         self.test_delete_message = {'action': 'delete_element', 'id': self.test_element.pk,
                                     'messageType': 'persistent'}
+        self.test_ui_message = self.test_update_message.copy()
+        self.test_ui_message['messageType'] = 'ui'
 
 
 class CreateMessages(MessageTestCase):
@@ -201,6 +204,10 @@ class UpdateMessages(EditMessageTestCase):
     def test_update_drawing_filter(self):
         with self.assertRaises(SvgElement.DoesNotExist):
             process_message(self.other_test_drawing, json.dumps(self.test_update_message))
+
+    def test_ui_message(self):
+        result = process_message(self.test_drawing, json.dumps(self.test_ui_message))
+        self.assertJSONEqual(result, json.dumps(self.test_ui_message))
 
 
 class DeleteMessages(EditMessageTestCase):

@@ -3,9 +3,12 @@
 
 from .base import *
 
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': join(PROJECT_ROOT, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'gridviz',
+        'USER': 'root',
+        'PASSWORD': ''
     }
 }

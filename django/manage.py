@@ -2,8 +2,11 @@
 
 # Copyright (c) 2014 Kevin Bell. All rights reserved.
 # See the file LICENSE.txt for copying permission.
+
 from gevent import monkey
 monkey.patch_all()
+import pymysql
+pymysql.install_as_MySQLdb()
 
 import os
 import sys

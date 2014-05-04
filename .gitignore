@@ -4,6 +4,7 @@
 
 # Generated static files
 /static/
+/collected_static/
 
 # Node/Angular/JS stuff
 /node_modules/

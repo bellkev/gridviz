@@ -11,7 +11,7 @@ install:
   - npm install
   - bower install
 script:
-  - coverage run --rcfile=django/.coveragerc django/manage.py test gridviz
+  - python python_scripts/run_coverage.py run --rcfile=django/.coveragerc django/manage.py test gridviz
   - karma start angular/karma-coverage.conf.js --single-run
 after_success:
   - node node_scripts/convert_lcov.js angular/coverage/PhantomJS*/lcov.info angular/coverage/coveralls.json
