@@ -9,6 +9,6 @@ coverage==3.7.1
 coveralls==0.4.1
 PyMySQL==0.6.1
 uwsgi==2.0.4
--e git://github.com/bellkev/django-registration@2faa6df773de98c1dd1bab02dc981975861d8fc9#egg=django_registration-master
+-e git://github.com/bellkev/django-registration@bf9f9408fe7955dbfea4da32795f7d64ba955190#egg=django-registration
 boto==2.27.0
 django-ses==0.6.0
