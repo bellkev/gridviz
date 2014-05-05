@@ -1,0 +1,20 @@
+{# Copyright (c) 2014 Kevin Bell. All rights reserved. #}
+{# See the file LICENSE.txt for copying permission. #}
+
+{% load i18n %}
+{% url 'registration_activate' activation_key as activation_key_url%}
+{% blocktrans with sitename=site.name siteurl=site.domain %}
+
+You have asked to register an account at {{ sitename }}.
+
+If this wasn't you, please ignore this email
+and your address will be removed from our records.
+
+To activate this account, please click the following link:
+
+http://{{ siteurl }}{{ activation_key_url }}
+
+Sincerely,
+{{ sitename }}
+
+{% endblocktrans %}

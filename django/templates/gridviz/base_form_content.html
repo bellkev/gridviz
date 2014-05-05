@@ -2,9 +2,12 @@
 {# See the file LICENSE.txt for copying permission. #}
 
 {% extends "gridviz/base.html" %}
+{% load static %}
 
 {% block content %}
     <div id="form-content">
         {% block form_content %}{% endblock %}
     </div>
+    <script src="{% static "jquery/dist/jquery.js" %}"></script>
+    <script src="{% static "bootstrap/dist/js/bootstrap.js" %}"></script>
 {% endblock %}

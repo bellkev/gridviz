@@ -1,0 +1,12 @@
+{# Copyright (c) 2014 Kevin Bell. All rights reserved. #}
+{# See the file LICENSE.txt for copying permission. #}
+
+{% extends "gridviz/base_form_content.html" %}
+
+{% block form_content %}
+    <div id="activation-complete">
+        <div class="content-title">Activation Complete</div>
+        <p>Your account has been activated. You can now <a href='{% url 'auth_login' %}'>login</a>
+            using the username and password you used to sign up.</p>
+    </div>
+{% endblock %}

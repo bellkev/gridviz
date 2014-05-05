@@ -40,6 +40,7 @@ INSTALLED_APPS = (
     'ws4redis',
     'bootstrapform',
     'gridviz',
+    'registration',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -133,3 +134,17 @@ CACHES = {
 # SVG Store
 
 SVG_STORE = 'gridviz'
+
+# Email confirmations
+
+EMAIL_BACKEND = 'django_ses.SESBackend'
+
+ACCOUNT_ACTIVATION_DAYS = 1
+
+AWS_SES_REGION_NAME = 'us-west-2'
+
+AWS_SES_REGION_ENDPOINT = 'email.us-west-2.amazonaws.com'
+
+DEFAULT_FROM_EMAIL = 'kevin.a.bell@gmail.com'
+
+LOGIN_REDIRECT_URL = '/drawings/'
