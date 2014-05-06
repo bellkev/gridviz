@@ -1,7 +1,7 @@
 # Copyright (c) 2014 Kevin Bell. All rights reserved.
 # See the file LICENSE.txt for copying permission.
 
-Django==1.7b1
+-e git+https://github.com/django/django@549b65824184711823e6a8c38ccf7365f10023d8#egg=django
 django-websocket-redis==0.4.0
 django-bootstrap-form==3.1
 django-model-utils==2.0.3

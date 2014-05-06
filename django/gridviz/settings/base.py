@@ -14,17 +14,6 @@ PROJECT_ROOT = dirname(MODULE_ROOT)
 SYSTEM_ROOT = dirname(PROJECT_ROOT)
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/dev/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = ')9d0jv%kf48f28sbuo03uzpheaf_&jc-o8$wx@x(8&0&=^iyxy'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-TEMPLATE_DEBUG = True
-
 ALLOWED_HOSTS = []
 
 

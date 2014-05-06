@@ -5,6 +5,7 @@ from importlib import import_module
 
 import json
 from django.conf import settings
+from django.contrib.auth import get_user_model
 import gevent
 
 from django.test import TestCase, TransactionTestCase, RequestFactory
@@ -137,7 +138,9 @@ class DrawingCreateTests(TestCase):
 
 class DrawingUpdateTests(TestCase):
     def setUp(self):
-        self.new_drawing = Drawing.objects.create(title='abc')
+        self.new_user = get_user_model().objects.create_user(username='joe', password='abc')
+        self.new_drawing = Drawing.objects.create(title='abc', created_by=self.new_user)
+        self.client.login(username='joe', password='abc')
 
     def test_rename(self):
         self.client.post('/drawings/' + str(self.new_drawing.pk), {'title': 'def'})
@@ -151,6 +154,10 @@ class DrawingUpdateTests(TestCase):
         response = self.client.get('/drawings/' + str(self.new_drawing.pk),
                                    HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertJSONEqual(response.content, json.dumps({'title': 'abc', 'elements': []}))
+
+    def test_unauthorized(self):
+        response = self.client.get('/drawings/' + str(self.new_drawing.pk))
+        self.assertEqual(response.status_code, 404)
 
 
 class DrawingDeleteTests(TestCase):
@@ -259,6 +266,7 @@ def blowup(e):
 
 class SubscriberTests(TestCase):
     def setUp(self):
+        #TODO: Use override_settings decorator instead
         settings.SVG_STORE = 'gridviz.test_svg_store'
         self.message_module = import_module('{}.messages'.format(settings.SVG_STORE))
         channels = ['subscribe-broadcast', 'publish-broadcast']
