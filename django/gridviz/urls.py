@@ -3,10 +3,9 @@
 
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
-from django.contrib.auth.decorators import login_required
 from registration.backends.default import urls as registration_urls
 
-from gridviz import views
+from drawings import views
 
 urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),

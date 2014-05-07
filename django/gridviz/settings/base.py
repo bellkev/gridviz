@@ -30,6 +30,8 @@ INSTALLED_APPS = (
     'bootstrapform',
     'gridviz',
     'registration',
+    'drawings',
+    'sql_svg_store',
 )
 
 MIDDLEWARE_CLASSES = (
