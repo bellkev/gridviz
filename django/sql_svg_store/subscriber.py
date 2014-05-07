@@ -14,6 +14,7 @@ class DatabaseSubscriber(RedisSubscriber):
         super(DatabaseSubscriber, self).__init__(connection)
 
     def set_pubsub_channels(self, request, channels):
+        # TODO: Check if user can access this drawing
         self.drawing_id = int(request.path_info.replace(settings.WEBSOCKET_URL, '', 1))
         super(DatabaseSubscriber, self).set_pubsub_channels(request, channels)
 
