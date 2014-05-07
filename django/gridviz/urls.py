@@ -11,9 +11,9 @@ from gridviz import views
 urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^accounts/', include(registration_urls)),
-    url(r'^drawings/$', login_required(views.DrawingList.as_view()), name='gridviz_drawing_list'),
-    url(r'^drawings/create$', login_required(views.DrawingCreate.as_view()), name='gridviz_drawing_create'),
-    url(r'^drawings/(?P<pk>\d*)$', login_required(views.DrawingUpdate.as_view()), name='gridviz_drawing_update'),
-    url(r'^drawings/(?P<pk>\d*)/delete$', login_required(views.DrawingDelete.as_view()), name='gridviz_drawing_delete'),
-    url(r'^drawings/(?P<pk>\d*)/edit', login_required(views.DrawingEdit.as_view()), name='gridviz_drawing_edit')
+    url(r'^drawings/$', views.DrawingList.as_view(), name='gridviz_drawing_list'),
+    url(r'^drawings/create$', views.DrawingCreate.as_view(), name='gridviz_drawing_create'),
+    url(r'^drawings/(?P<pk>\d*)$', views.DrawingUpdate.as_view(), name='gridviz_drawing_update'),
+    url(r'^drawings/(?P<pk>\d*)/delete$', views.DrawingDelete.as_view(), name='gridviz_drawing_delete'),
+    url(r'^drawings/(?P<pk>\d*)/edit', views.DrawingEdit.as_view(), name='gridviz_drawing_edit')
 )

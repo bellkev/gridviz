@@ -1,24 +1,27 @@
 # Copyright (c) 2014 Kevin Bell. All rights reserved.
 # See the file LICENSE.txt for copying permission.
 
-from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponseRedirect
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.core.urlresolvers import reverse_lazy
+from braces.views import LoginRequiredMixin
 
 from .models import Drawing
 
 
-class DrawingList(ListView):
-    model = Drawing
-
+class FilterByUserMixin(LoginRequiredMixin):
+    # SingleObjectMixin filters by pk after this
     def get_queryset(self):
         return Drawing.objects.filter(created_by=self.request.user)
 
 
-class DrawingCreate(CreateView):
+class DrawingList(FilterByUserMixin, ListView):
     model = Drawing
-    fields = ['title']
+
+
+class DrawingCreate(LoginRequiredMixin, CreateView):
+    model = Drawing
+    fields = ('title',)
     template_name_suffix = '_create'
 
     def form_valid(self, form):
@@ -28,14 +31,14 @@ class DrawingCreate(CreateView):
         return HttpResponseRedirect(self.get_success_url())
 
 
-class DrawingDelete(DeleteView):
+class DrawingDelete(FilterByUserMixin, DeleteView):
     model = Drawing
     success_url = reverse_lazy('gridviz_drawing_list')
 
 
-class DrawingUpdate(UpdateView):
+class DrawingUpdate(FilterByUserMixin, UpdateView):
     model = Drawing
-    fields = ['title']
+    fields = ('title',)
     template_name_suffix = '_update'
 
     def get_queryset(self):
@@ -49,6 +52,6 @@ class DrawingUpdate(UpdateView):
             return super(DrawingUpdate, self).get(request, *args, **kwargs)
 
 
-class DrawingEdit(DetailView):
+class DrawingEdit(FilterByUserMixin, DetailView):
     model = Drawing
     template_name_suffix = '_edit'

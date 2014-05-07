@@ -16,21 +16,41 @@ from .models import Drawing, SvgElementType, SvgElement, SvgAttribute, SvgFloatD
 from .messages import process_message
 
 
-class SvgTest(TestCase):
+class UserDataMixin(object):
     def setUp(self):
-        self.test_drawing = Drawing.objects.create(title='test_drawing')
+        self.login_kwargs = {'username': 'joe', 'password': 'abc'}
+        self.other_login_kwargs = {'username': 'jane', 'password': 'abc'}
+        self.test_user = get_user_model().objects.create_user(**self.login_kwargs)
+        self.other_user = get_user_model().objects.create_user(**self.other_login_kwargs)
+        super(UserDataMixin, self).setUp()
+
+
+class LoggedInMixin(UserDataMixin):
+    def setUp(self):
+        super(LoggedInMixin, self).setUp()
+        self.client.login(**self.login_kwargs)
+
+
+class DrawingDataMixin(object):
+    def setUp(self):
+        self.test_drawing = Drawing.objects.create(title='abc', created_by=self.test_user)
+        self.other_drawing = Drawing.objects.create(title='def', created_by=self.other_user)
+        super(DrawingDataMixin, self).setUp()
+
+
+class SvgDataMixin(object):
+    def setUp(self):
         self.test_type = SvgElementType.objects.create(name='test_type')
         self.test_attr = SvgAttribute.objects.create(name='test_attr', data_type=svg_data_types.FLOAT_TYPE)
+        super(SvgDataMixin, self).setUp()
 
 
-class DrawingModelTest(SvgTest):
+class DrawingModelTest(UserDataMixin, DrawingDataMixin, SvgDataMixin, TestCase):
     def test_unicode_representation(self):
-        drawing = Drawing(title='My drawing title')
-        self.assertEqual(unicode(drawing), drawing.title)
+        self.assertEqual(unicode(self.test_drawing), self.test_drawing.title)
 
     def test_get_absolute_url(self):
-        drawing = Drawing.objects.create(title='My drawing title', )
-        self.assertEqual(drawing.get_absolute_url(), '/drawings/' + str(drawing.pk))
+        self.assertEqual(self.test_drawing.get_absolute_url(), '/drawings/' + str(self.test_drawing.pk))
 
     def test_get_elements(self):
         test_element = SvgElement.objects.create(type=self.test_type, drawing=self.test_drawing)
@@ -52,7 +72,7 @@ class DrawingModelTest(SvgTest):
                               {'id': el3.pk, 'tagName': 'test_type', 'attrs': {'attr_2': 4, 'attr_1': 3}}])
 
 
-class SvgElementModelTest(SvgTest):
+class SvgElementModelTest(UserDataMixin, DrawingDataMixin, SvgDataMixin, TestCase):
     def test_get_attrs(self):
         test_element = SvgElement.objects.create(type=self.test_type, drawing=self.test_drawing)
         attr_1 = SvgAttribute.objects.create(name='attr_1', data_type=svg_data_types.FLOAT_TYPE)
@@ -63,59 +83,59 @@ class SvgElementModelTest(SvgTest):
             self.assertEqual(test_element.get_attrs(), {'attr_1': 1, 'attr_2': 2})
 
 
-class SvgFloatDatumModelTest(SvgTest):
+class SvgFloatDatumModelTest(UserDataMixin, DrawingDataMixin, SvgDataMixin, TestCase):
     def test_length(self):
         test_element = SvgElement.objects.create(type=self.test_type, drawing=self.test_drawing)
         SvgFloatDatum.objects.create(element=test_element, attribute=self.test_attr, value=12.5)
         self.assertEqual(SvgElement.objects.first().data.first().svgfloatdatum.value, 12.5)
 
 
-class SvgCharDatumModelTest(SvgTest):
+class SvgCharDatumModelTest(UserDataMixin, DrawingDataMixin, SvgDataMixin, TestCase):
     def test_length(self):
         test_element = SvgElement.objects.create(type=self.test_type, drawing=self.test_drawing)
         SvgCharDatum.objects.create(element=test_element, attribute=self.test_attr, value='abc')
         self.assertEqual(SvgElement.objects.first().data.first().svgchardatum.value, 'abc')
 
 
-class ProjectTests(TestCase):
+class TestLoginRequired(UserDataMixin, DrawingDataMixin, TestCase):
+    def assertRedirectsToLogin(self, response, next):
+        self.assertRedirects(response, '{}?next={}'.format(settings.LOGIN_URL, next))
+
     def test_drawings(self):
-        response = self.client.get('/drawings/')
-        self.assertEqual(response.status_code, 200)
+        drawings_url = '/drawings/'
+        response = self.client.get(drawings_url)
+        self.assertRedirectsToLogin(response, drawings_url)
 
-    def test_drawing_update(self):
-        drawing = Drawing.objects.create(title='drawing title')
-        response = self.client.get('/drawings/' + str(drawing.pk))
-        self.assertEqual(response.status_code, 200)
-
-    def test_not_found_drawing(self):
-        drawing = Drawing.objects.create(title='drawing title')
-        response = self.client.get('/drawings/' + str(drawing.pk + 1))
-        self.assertEqual(response.status_code, 404)
+    def test_update_drawing(self):
+        update_url = self.test_drawing.get_absolute_url()
+        response = self.client.get(update_url)
+        self.assertRedirectsToLogin(response, update_url)
 
     def test_create_drawing(self):
-        response = self.client.get('/drawings/create')
-        self.assertEqual(response.status_code, 200)
+        create_url = '/drawings/create'
+        response = self.client.get(create_url)
+        self.assertRedirectsToLogin(response, create_url)
 
     def test_delete_drawing(self):
-        drawing = Drawing.objects.create(title='drawing title')
-        response = self.client.get(drawing.get_absolute_url() + '/delete')
-        self.assertEqual(response.status_code, 200)
+        delete_url = self.test_drawing.get_absolute_url() + '/delete'
+        response = self.client.get(delete_url)
+        self.assertRedirectsToLogin(response, delete_url)
 
     def test_drawing_edit(self):
-        drawing = Drawing.objects.create(title='drawing title')
-        response = self.client.get(drawing.get_absolute_url() + '/edit')
-        self.assertEqual(response.status_code, 200)
+        edit_url = self.test_drawing.get_absolute_url() + '/edit'
+        response = self.client.get(edit_url)
+        self.assertRedirectsToLogin(response, edit_url)
 
 
-class DrawingListTests(TestCase):
+class TestDrawingList(LoggedInMixin, TestCase):
     def test_one_drawing(self):
-        Drawing.objects.create(title='1-title')
+        Drawing.objects.create(title='1-title', created_by=self.test_user)
         response = self.client.get('/drawings/')
         self.assertContains(response, '1-title')
 
     def test_two_drawings(self):
-        Drawing.objects.create(title='1-title')
-        Drawing.objects.create(title='2-title')
+        Drawing.objects.create(title='1-title', created_by=self.test_user)
+        Drawing.objects.create(title='2-title', created_by=self.test_user)
         response = self.client.get('/drawings/')
         self.assertContains(response, '1-title')
         self.assertContains(response, '2-title')
@@ -124,11 +144,21 @@ class DrawingListTests(TestCase):
         response = self.client.get('/drawings/')
         self.assertContains(response, 'You haven\'t made any drawings yet')
 
+    def test_user_filtering(self):
+        Drawing.objects.create(title='1-title', created_by=self.other_user)
+        response = self.client.get('/drawings/')
+        self.assertContains(response, 'You haven\'t made any drawings yet')
 
-class DrawingCreateTests(TestCase):
+
+class TestDrawingCreate(LoggedInMixin, TestCase):
+    def test_html(self):
+        response = self.client.get('/drawings/create')
+        self.assertContains(response, 'New Drawing')
+
     def test_create(self):
         self.client.post('/drawings/create', {'title': 'a'})
         new_drawing = Drawing.objects.first()
+        self.assertEqual(new_drawing.created_by, self.test_user)
         self.assertEqual(new_drawing.title, 'a')
 
     def test_no_title(self):
@@ -136,41 +166,40 @@ class DrawingCreateTests(TestCase):
         self.assertContains(response, 'This field is required.')
 
 
-class DrawingUpdateTests(TestCase):
-    def setUp(self):
-        self.new_user = get_user_model().objects.create_user(username='joe', password='abc')
-        self.new_drawing = Drawing.objects.create(title='abc', created_by=self.new_user)
-        self.client.login(username='joe', password='abc')
-
+class TestDrawingUpdate(LoggedInMixin, DrawingDataMixin, TestCase):
     def test_rename(self):
-        self.client.post('/drawings/' + str(self.new_drawing.pk), {'title': 'def'})
-        self.assertEqual(Drawing.objects.get(pk=self.new_drawing.pk).title, 'def')
+        self.client.post(self.test_drawing.get_absolute_url(), {'title': 'def'})
+        self.assertEqual(Drawing.objects.get(pk=self.test_drawing.pk).title, 'def')
 
     def test_html(self):
-        response = self.client.get('/drawings/' + str(self.new_drawing.pk))
+        response = self.client.get(self.test_drawing.get_absolute_url())
         self.assertContains(response, 'Edit Drawing')
 
     def test_json(self):
-        response = self.client.get('/drawings/' + str(self.new_drawing.pk),
+        response = self.client.get(self.test_drawing.get_absolute_url(),
                                    HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertJSONEqual(response.content, json.dumps({'title': 'abc', 'elements': []}))
 
     def test_unauthorized(self):
-        response = self.client.get('/drawings/' + str(self.new_drawing.pk))
+        self.client.login(**self.other_login_kwargs)
+        response = self.client.get(self.test_drawing.get_absolute_url())
         self.assertEqual(response.status_code, 404)
 
 
-class DrawingDeleteTests(TestCase):
+class TestDrawingDelete(LoggedInMixin, DrawingDataMixin, TestCase):
+    def test_html(self):
+        response = self.client.get(self.test_drawing.get_absolute_url() + '/delete')
+        self.assertContains(response, 'Delete Confirmation')
+
     def test_delete(self):
-        new_drawing = Drawing.objects.create(title='abc')
-        self.client.post(new_drawing.get_absolute_url() + '/delete')
-        self.assertRaises(Drawing.DoesNotExist, Drawing.objects.get, pk=new_drawing.pk)
+        self.client.post(self.test_drawing.get_absolute_url() + '/delete')
+        with self.assertRaises(Drawing.DoesNotExist):
+            Drawing.objects.get(pk=self.test_drawing.pk)
 
 
-class MessageTestCase(TransactionTestCase):
+class MessageTestCase(UserDataMixin, DrawingDataMixin, TransactionTestCase):
     def setUp(self):
-        self.test_drawing = Drawing.objects.create(title='test_drawing')
-        self.other_test_drawing = Drawing.objects.create(title='other_test_drawing')
+        super(MessageTestCase, self).setUp()
         self.rect_type = SvgElementType.objects.create(name='rect')
         SvgAttribute.objects.bulk_create([
             SvgAttribute(name='x', data_type=svg_data_types.FLOAT_TYPE),
@@ -216,7 +245,7 @@ class UpdateMessages(EditMessageTestCase):
 
     def test_update_drawing_filter(self):
         with self.assertRaises(SvgElement.DoesNotExist):
-            process_message(self.other_test_drawing, json.dumps(self.test_update_message))
+            process_message(self.other_drawing, json.dumps(self.test_update_message))
 
     def test_ui_message(self):
         result = process_message(self.test_drawing, json.dumps(self.test_ui_message))
@@ -235,7 +264,7 @@ class DeleteMessages(EditMessageTestCase):
 
     def test_delete_drawing_filter(self):
         with self.assertRaises(SvgElement.DoesNotExist):
-            process_message(self.other_test_drawing, json.dumps(self.test_delete_message))
+            process_message(self.other_drawing, json.dumps(self.test_delete_message))
 
 
 class MockPubSub(object):

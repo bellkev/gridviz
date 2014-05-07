@@ -12,3 +12,4 @@ uwsgi==2.0.4
 -e git://github.com/bellkev/django-registration@bf9f9408fe7955dbfea4da32795f7d64ba955190#egg=django-registration
 boto==2.27.0
 django-ses==0.6.0
+django-braces==1.4.0
