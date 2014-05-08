@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Parameters" : {
+    "Parameters": {
 
         "KeyName": {
             "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instances",
@@ -60,27 +60,6 @@
     "Resources": {
         "WebServer": {
             "Type": "AWS::EC2::Instance",
-            "Metadata": {
-                "AWS::CloudFormation::Init": {
-                    "config": {
-                        "packages": {
-                            "apt": ["nginx", "mysql-server", "git"]
-                        },
-                        "services": {
-                            "sysvinit": {
-                                "nginx": {
-                                    "enabled": "true",
-                                    "ensureRunning": "true"
-                                },
-                                "mysqld": {
-                                    "enabled": "true",
-                                    "ensureRunning": "true"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
             "Properties": {
                 "ImageId": {
                     "Fn::FindInMap": [ "Region2Ami", {
@@ -95,36 +74,67 @@
                         "Ref": "ServerSecurityGroup"
                     }
                 ],
-                "KeyName": "",
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
                 "UserData": {
                     "Fn::Base64": {
                         "Fn::Join": ["", [
                             "#!/bin/bash\n",
-                            "apt-get -y update\n",
-                            "apt-get -y install python-setuptools\n",
-                            "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
-                            "cfn-init -v --region ", {
+                            "echo AWS_REGION=", {
                                 "Ref": "AWS::Region"
-                            }, " -s ", {
+                            }, " >> /etc/environment\n",
+                            "echo AWS_STACK_ID=", {
                                 "Ref": "AWS::StackId"
-                            }, " -r LaunchConfig\n",
-                            "git clone https://github.com/bellkev/gridviz /opt/gridviz\n"
+                            }, " >> /etc/environment\n",
+                            "echo GRIDVIZ_ROOT=/opt/gridviz >> /etc/environment\n",
+                            "echo GRIDVIZ_HOSTNAME=$(curl -s http://169.254.169.254/latest/meta-data/public-hostname) >> /etc/environment\n",
+                            "source /etc/environment\n",
+                            "apt-get -y update\n",
+                            "apt-get -y install python-pip\n",
+                            "pip install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
+                            "cfn-init -v --region $AWS_REGION -s $AWS_STACK_ID -r WebServer\n",
+                            "git clone https://github.com/bellkev/gridviz.git /opt/gridviz\n",
+                            "python /opt/gridviz/django/manage.py collectstatic\n",
+                            "cp /opt/gridviz/config/uwsgi_dev.ini /etc/uwsgi/apps-available/\n",
+                            "ln -s /etc/uwsgi/apps-available/uwsgi_dev.ini /etc/uwsgi/apps-enabled/\n",
+                            "cp /opt/gridviz/config/nginx_dev.conf /etc/nginx/sites-available\n",
+                            "sed -i 's/<GRIDVIZ_HOSTNAME>/$GRIDVIZ_HOSTNAME/' nginx_dev.conf\n",
+                            "sed -i 's/<GRIDVIZ_ROOT>/$GRIDVIZ_ROOT/' nginx_dev.conf\n",
+                            "ln -s /etc/nginx/sites-available/nginx_dev.conf /etc/nginx/sites-enabled/\n"
                         ]]
                     }
                 }
-            }
-        },
-        "WaitHandle": {
-            "Type": "AWS::CloudFormation::WaitConditionHandle"
-        },
-        "WaitCondition": {
-            "Type": "AWS::CloudFormation::WaitCondition",
-            "DependsOn": "WebServer",
-            "Properties": {
-                "Handle": {
-                    "Ref": "WaitHandle"
-                },
-                "Timeout": "300"
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Init": {
+                    "config": {
+                        "packages": {
+                            "apt": {
+                                "nginx": [],
+                                "mysql-server": [],
+                                "git": [],
+                                "uwsgi": []
+                            }
+                        },
+                        "services": {
+                            "sysvinit": {
+                                "nginx": {
+                                    "enabled": "true",
+                                    "ensureRunning": "true"
+                                },
+                                "mysql": {
+                                    "enabled": "true",
+                                    "ensureRunning": "true"
+                                },
+                                "uwsgi": {
+                                    "enabled": "true",
+                                    "ensureRunning": "true"
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "ServerSecurityGroup": {
@@ -142,9 +152,7 @@
                         "IpProtocol": "tcp",
                         "FromPort": "22",
                         "ToPort": "22",
-                        "CidrIp": {
-                            "Ref": "SSHLocation"
-                        }
+                        "CidrIp": "0.0.0.0/0"
                     }
                 ]
             }
