@@ -109,7 +109,7 @@ LOGGING = {
 
 # Websockets
 
-WS4REDIS_SUBSCRIBER = 'gridviz.subscriber.DatabaseSubscriber'
+WS4REDIS_SUBSCRIBER = 'sql_svg_store.subscriber.DatabaseSubscriber'
 
 WS4REDIS_EXPIRE = 0
 
@@ -124,7 +124,7 @@ CACHES = {
 
 # SVG Store
 
-SVG_STORE = 'gridviz'
+SVG_STORE = 'sql_svg_store'
 
 # Email confirmations
 
