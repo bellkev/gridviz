@@ -14,9 +14,6 @@ PROJECT_ROOT = dirname(MODULE_ROOT)
 SYSTEM_ROOT = dirname(PROJECT_ROOT)
 
 
-ALLOWED_HOSTS = []
-
-
 # Application definition
 
 INSTALLED_APPS = (
