@@ -28,6 +28,8 @@
     git: repo=https://github.com/bellkev/gridviz.git dest=/opt/gridviz
   - name: ensure pip installed
     apt: name=python-pip state=present
+  - name: ensure python-dev installed
+    apt: name=python-dev state=present
   - name: ensure pip packages installed
     pip: requirements=/opt/gridviz/requirements.txt
   - name: run django migrations
