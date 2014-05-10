@@ -95,6 +95,7 @@
                             "pip install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
                             "cfn-init -v --region $AWS_REGION -s $AWS_STACK_ID -r WebServer\n",
                             "git clone https://github.com/bellkev/gridviz.git /opt/gridviz\n",
+                            "python install -r /opt/gridviz/requirements.txt\n",
                             "python /opt/gridviz/django/manage.py collectstatic\n",
                             "cp /opt/gridviz/config/uwsgi_dev.ini /etc/uwsgi/apps-available/\n",
                             "ln -s /etc/uwsgi/apps-available/uwsgi_dev.ini /etc/uwsgi/apps-enabled/\n",
