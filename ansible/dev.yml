@@ -22,6 +22,7 @@
   - name: ensure uwsgi installed
     apt: name=uwsgi state=present
   # app
+  - ec2_facts:
   - name: ensure git installed
     apt: name=git state=present
   - name: checkout repo
@@ -33,4 +34,5 @@
   - name: ensure pip packages installed
     pip: requirements=/opt/gridviz/requirements.txt
   - name: run django migrations
-    django_manage: app_path=/opt/gridviz/django command=migrate settings=gridviz.settings.dev_mysql
+    django_manage: app_path=/opt/gridviz/django command=migrate settings=gridviz.settings.dev_uwsgi
+    environment: {GRIDVIZ_HOSTNAME: "{{ hostvars[inventory_hostname]['ansible_ec2_public_hostname'] }}"}
