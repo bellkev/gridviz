@@ -86,3 +86,8 @@
     template: src=nginx_dev.conf dest=/etc/nginx/sites-available
   - name: ensure nginx site enabled
     file: src=/etc/nginx/sites-available/nginx_dev.conf dest=/etc/nginx/sites-enabled/nginx_dev.conf state=link
+  - name: ensure services running
+    service: name={{ item }} state=started
+    with_items:
+      - nginx
+      - uwsgi
