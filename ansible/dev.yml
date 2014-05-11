@@ -18,20 +18,28 @@
       - mysql-server
       - mysql-client
       - python-mysqldb
-  - name: create database
+  - name: ensure mysql service started
+    service: name=mysql state=started
+  - name: ensure database exists
     mysql_db: name=gridviz state=present
   # Nginx
   - name: ensure nginx installed
     apt: name=nginx state=present
+  - name: ensure nginx service started
+    service: name=nginx state=started
   # uwsgi
   - name: ensure uwsgi installed
     apt: name={{ item }} state=present
     with_items:
       - uwsgi
       - uwsgi-plugin-python
+  - name: ensure uwsgi service started
+    service: name=uwsgi state=started
   # redis
   - name: ensure redis installed
     apt: name=redis-server state=present
+  - name: ensure redis service started
+    service: name=redis-server state=started
   # app
   - name: gather facts based on ec2 metadata
     ec2_facts:
@@ -39,7 +47,7 @@
     set_fact:
       gridviz_hostname:  "{{ hostvars[inventory_hostname]['ansible_ec2_public_hostname'] }}"
       django_env:
-        GRIDVIZ_HOSTNAME: gridviz_hostname
+        GRIDVIZ_HOSTNAME: "{{ hostvars[inventory_hostname]['ansible_ec2_public_hostname'] }}"
         DJANGO_SETTINGS_MODULE: gridviz.settings.dev_uwsgi
   - name: ensure required packages installed
     apt: name={{ item }} state=present
@@ -72,22 +80,18 @@
     with_items:
       - migrate
       - collectstatic
+  # This task needs to use template because ini_file can't handle uwsgi's duplicate keys
   - name: ensure uwsgi config file in place
-    copy: src=uwsgi_dev.ini dest=/etc/uwsgi/apps-available force=no
-  - name: ensure uwsgi configs set
-    ini_file: section=uwsgi dest=/etc/uwsgi/apps-available/uwsgi_dev.ini option=pythonpath value=/opt/gridviz/django
-  # This task needs to use lineinfile because ini_file can't handle uwsgi's duplicate keys
-  - name: ensure django environment applied to uwsgi settings
-    lineinfile: dest=/etc/uwsgi/apps-available/uwsgi_dev.ini line="env = {{ item.key }}={{ item.value }}" state=present
-    with_dict: django_env
+    template: src=uwsgi_dev.ini dest=/etc/uwsgi/apps-available
   - name: ensure uwsgi app enabled
     file: src=/etc/uwsgi/apps-available/uwsgi_dev.ini dest=/etc/uwsgi/apps-enabled/uwsgi_dev.ini state=link
   - name: ensure nginx config file in place
     template: src=nginx_dev.conf dest=/etc/nginx/sites-available
   - name: ensure nginx site enabled
     file: src=/etc/nginx/sites-available/nginx_dev.conf dest=/etc/nginx/sites-enabled/nginx_dev.conf state=link
-  - name: ensure services running
-    service: name={{ item }} state=started
+  # The following is necessary for uwsgi because it appears not to be running in emperor mode in the debian distribution init.d script
+  - name: ensure services reloaded
+    service: name={{ item }} state=reloaded
     with_items:
       - nginx
       - uwsgi
