@@ -2,7 +2,7 @@
 # See the file LICENSE.txt for copying permission.
 
 ---
-- hosts: all
+- hosts: ec2-54-184-245-41.us-west-2.compute.amazonaws.com
   remote_user: ubuntu
   sudo: yes
 
@@ -29,6 +29,9 @@
     with_items:
       - uwsgi
       - uwsgi-plugin-python
+  # redis
+  - name: ensure redis installed
+    apt: name=redis-server state=present
   # app
   - name: gather facts based on ec2 metadata
     ec2_facts:
@@ -38,16 +41,31 @@
       django_env:
         GRIDVIZ_HOSTNAME: gridviz_hostname
         DJANGO_SETTINGS_MODULE: gridviz.settings.dev_uwsgi
-  - name: ensure git installed
-    apt: name=git state=present
+  - name: ensure required packages installed
+    apt: name={{ item }} state=present
+    with_items:
+      - git
+      - python-pip
+      - python-dev
+      - nodejs
+      - npm
+  - name: ensure nodejs available as node
+    file: src=/usr/bin/nodejs dest=/usr/bin/node state=link
   - name: checkout repo
     git: repo=https://github.com/bellkev/gridviz.git dest=/opt/gridviz
-  - name: ensure pip installed
-    apt: name=python-pip state=present
-  - name: ensure python-dev installed
-    apt: name=python-dev state=present
   - name: ensure pip packages installed
     pip: requirements=/opt/gridviz/requirements.txt
+  - name: ensure bower and grunt available
+    npm: global=yes name={{ item }}
+    with_items:
+      - bower
+      - grunt-cli
+  - name: ensure bower packages installed
+    command: bower install --allow-root chdir=/opt/gridviz
+  - name: ensure npm packages installed
+    command: npm install chdir=/opt/gridviz
+  - name: ensure less compiled
+    command: grunt less chdir=/opt/gridviz
   - name: run django migrations and collectstatic
     django_manage: app_path=/opt/gridviz/django command={{ item }} settings=gridviz.settings.dev_uwsgi
     environment: django_env
