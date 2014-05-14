@@ -2,7 +2,43 @@
 # See the file LICENSE.txt for copying permission.
 
 ---
-- hosts: ec2-54-184-245-41.us-west-2.compute.amazonaws.com
+- hosts: localhost
+  connection: local
+  gather_facts: False
+  vars:
+    keypair: aws-key-2
+    instance_type: t1.micro
+    group: ssh-http
+    region: us-west-2
+    count_tags: { "Name": "dev" }
+  tasks:
+  - name: lookup ami id
+    ec2_ami_search: distro=ubuntu region={{ region }} release=trusty
+    register: ubuntu_image
+  - name: ensure one instance exists
+    ec2:
+      image: "{{ ubuntu_image.ami }}"
+      instance_type: "{{ instance_type }}"
+      instance_tags: "{{ count_tags }}"
+      region: "{{ region }}"
+      group: "{{ group }}"
+      wait: yes
+      exact_count: 1
+      count_tag: "{{ count_tags }}"
+      key_name: "{{ keypair }}"
+    register: ec2_info
+  - name: add instance to in-memory hosts
+    add_host: hostname={{ item.public_dns_name }} groupname=ec2_hosts
+    with_items: ec2_info.tagged_instances
+  - name: wait for instances to listen on port 22
+    wait_for:
+      state=started
+      host={{ item.public_dns_name }}
+      port=22
+    with_items: ec2_info.tagged_instances
+
+
+- hosts: ec2_hosts
   remote_user: ubuntu
   sudo: yes
 
@@ -89,7 +125,15 @@
     template: src=nginx_dev.conf dest=/etc/nginx/sites-available
   - name: ensure nginx site enabled
     file: src=/etc/nginx/sites-available/nginx_dev.conf dest=/etc/nginx/sites-enabled/nginx_dev.conf state=link
-  # The following is necessary for uwsgi because it appears not to be running in emperor mode in the debian distribution init.d script
+  # The following is necessary for uwsgi because it appears not to be running in emperor
+  # mode in the debian distribution init.d script
+  - name: check if uwsgi app already exists
+    command: "[ -d /run/uwsgi/app/uwsgi_dev ]"
+    ignore_errors: yes
+    register: uwsgi_run_result
+  - name: ensure uwsgi restarted
+    service: name=uwsgi state=restarted
+    when: uwsgi_run_result.rc
   - name: ensure services reloaded
     service: name={{ item }} state=reloaded
     with_items:
