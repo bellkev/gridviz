@@ -1,0 +1,27 @@
+# Copyright (c) 2014 Kevin Bell. All rights reserved.
+# See the file LICENSE.txt for copying permission.
+
+---
+- hosts: localhost
+  connection: local
+  gather_facts: False
+  vars:
+    role: gridviz-app-server
+    keypair: aws-key-2
+    instance_type: t1.micro
+    group: ssh-http
+    region: us-west-2
+  tasks:
+  - name: lookup ami id
+    ec2_ami_search: distro=ubuntu region={{ region }} release=trusty
+    register: ubuntu_image
+  # Note that launch configs cannot be updated -- only created or deleted
+  - name: ensure launch config exists
+    ec2_lc:
+      name: prod
+      region: "{{ region }}"
+      image_id: "{{ ubuntu_image.ami }}"
+      key_name: "{{ keypair }}"
+      security_groups: "{{ group }}"
+      instance_type: "{{ instance_type }}"
+      instance_profile_name: "{{ role }}"
