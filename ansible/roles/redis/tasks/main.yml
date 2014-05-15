@@ -1,0 +1,8 @@
+# Copyright (c) 2014 Kevin Bell. All rights reserved.
+# See the file LICENSE.txt for copying permission.
+
+---
+- name: ensure redis installed
+  apt: name=redis-server state=present
+- name: ensure redis service started
+  service: name=redis-server state=started

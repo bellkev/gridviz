@@ -2,7 +2,8 @@
 # See the file LICENSE.txt for copying permission.
 
 ---
-- hosts: localhost
+- name: create an autoscaling group based on a launch configuration
+  hosts: localhost
   connection: local
   gather_facts: False
   vars:
@@ -11,6 +12,7 @@
     instance_type: t1.micro
     group: ssh-http
     region: us-west-2
+    azs: us-west-2a,us-west-2b,us-west-2c
   tasks:
   - name: lookup ami id
     ec2_ami_search: distro=ubuntu region={{ region }} release=trusty
@@ -18,10 +20,26 @@
   # Note that launch configs cannot be updated -- only created or deleted
   - name: ensure launch config exists
     ec2_lc:
-      name: prod
+      name: prod_lc
       region: "{{ region }}"
       image_id: "{{ ubuntu_image.ami }}"
       key_name: "{{ keypair }}"
       security_groups: "{{ group }}"
       instance_type: "{{ instance_type }}"
       instance_profile_name: "{{ role }}"
+      user_data: |
+        #!/bin/bash
+        apt-get install -y git python-setuptools python-dev
+        git clone https://github.com/bellkev/ansible.git /opt/ansible
+        (cd /opt/ansible && setup.py install)
+        git clone https://github.com/bellkev/gridviz.git /opt/gridviz
+        ansible-playbook /opt/gridviz/ansible/
+  - name: ensure asg exists
+    ec2_asg:
+      name: prod_asg
+      launch_config_name: prod_lc
+      min_size: 1
+      max_size: 1
+      region: "{{ region }}"
+      availability_zones: "{{ azs }}"
+      state: present

@@ -1,0 +1,11 @@
+# Copyright (c) 2014 Kevin Bell. All rights reserved.
+# See the file LICENSE.txt for copying permission.
+
+---
+- name: ensure uwsgi installed
+  apt: name={{ item }} state=present
+  with_items:
+    - uwsgi
+    - uwsgi-plugin-python
+- name: ensure uwsgi service started
+  service: name=uwsgi state=started
