@@ -1,0 +1,9 @@
+# Copyright (c) 2014 Kevin Bell. All rights reserved.
+# See the file LICENSE.txt for copying permission.
+
+---
+- name: ensure mysql-client installed
+  apt: name={{ item }} state=present
+  with_items:
+    - mysql-client
+    - python-mysqldb

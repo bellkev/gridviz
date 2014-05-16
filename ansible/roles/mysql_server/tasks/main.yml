@@ -2,7 +2,7 @@
 # See the file LICENSE.txt for copying permission.
 
 ---
-- name: ensure mysql installed
+- name: ensure mysql-server installed
   apt: name={{ item }} state=present
   with_items:
     - mysql-server

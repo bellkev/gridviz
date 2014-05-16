@@ -17,6 +17,6 @@
   remote_user: ubuntu
   sudo: yes
   roles:
-    - mysql
+    - mysql_server
     - redis
     - gridviz
