@@ -30,10 +30,10 @@
       user_data: |
         #!/bin/bash
         apt-get install -y git python-setuptools python-dev
-        git clone https://github.com/bellkev/ansible.git /opt/ansible
+        git clone -b personal https://github.com/bellkev/ansible.git /opt/ansible
         (cd /opt/ansible && setup.py install)
-        git clone https://github.com/bellkev/gridviz.git /opt/gridviz
-        ansible-playbook /opt/gridviz/ansible/
+        git clone https://github.com/bellkev/gridviz.git {{ gridviz_root }}
+        ansible-playbook {{ gridviz_root }}/ansible/bootstrap.yml
   - name: ensure asg exists
     ec2_asg:
       name: prod_asg

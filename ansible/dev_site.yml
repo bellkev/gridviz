@@ -1,0 +1,22 @@
+# Copyright (c) 2014 Kevin Bell. All rights reserved.
+# See the file LICENSE.txt for copying permission.
+
+---
+- name: ensure that a single instance is launched
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars:
+    instance_name: dev
+    group_name: ec2_hosts
+  roles:
+    - ec2_instance
+
+- name: ensure that the complete app is installed on the instance
+  hosts: ec2_hosts
+  remote_user: ubuntu
+  sudo: yes
+  roles:
+    - mysql
+    - redis
+    - gridviz
