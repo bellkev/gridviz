@@ -14,13 +14,15 @@
     region: us-west-2
     azs: us-west-2a,us-west-2b,us-west-2c
   tasks:
+  - fail: msg="The variable 'stack_name' must be specified as an extra var"
+    when: stack_name is not defined
   - name: lookup ami id
     ec2_ami_search: distro=ubuntu region={{ region }} release=trusty
     register: ubuntu_image
   # Note that launch configs cannot be updated -- only created or deleted
   - name: ensure launch config exists
     ec2_lc:
-      name: prod_lc
+      name: "{{ stack_name }}_lc"
       region: "{{ region }}"
       image_id: "{{ ubuntu_image.ami }}"
       key_name: "{{ keypair }}"
@@ -31,13 +33,16 @@
         #!/bin/bash
         apt-get install -y git python-setuptools python-dev
         git clone -b personal https://github.com/bellkev/ansible.git /opt/ansible
-        (cd /opt/ansible && setup.py install)
+        (cd /opt/ansible && python setup.py install)
         git clone https://github.com/bellkev/gridviz.git {{ gridviz_root }}
-        ansible-playbook {{ gridviz_root }}/ansible/bootstrap.yml
+        printf "[local]\nlocalhost\n" > /opt/local
+        mkdir /etc/ansible
+        printf "[defaults]\nlog_path = /var/log/ansible.log\n" > /etc/ansible/ansible.cfg
+        ansible-playbook {{ gridviz_root }}/ansible/bootstrap.yml -i /opt/local
   - name: ensure asg exists
     ec2_asg:
-      name: prod_asg
-      launch_config_name: prod_lc
+      name: "{{ stack_name }}_asg"
+      launch_config_name: "{{ stack_name }}_lc"
       min_size: 1
       max_size: 1
       region: "{{ region }}"
