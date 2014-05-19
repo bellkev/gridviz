@@ -40,10 +40,12 @@
 - name: ensure less compiled
   command: grunt less chdir=/opt/gridviz
 - name: ensure database exists
-  mysql_db: name=gridviz state=present
-  login_host: "{{ db_host }}"
-  login_user: "{{ db_user }}"
-  login_password: "{{ db_pass }}"
+  mysql_db:
+    name: gridviz
+    state: present
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_user }}"
+    login_password: "{{ db_pass }}"
 - name: run django migrations and collectstatic
   django_manage: app_path=/opt/gridviz/django command={{ item }} settings=gridviz.settings.dev_uwsgi
   environment: django_env
