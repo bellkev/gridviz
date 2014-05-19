@@ -11,7 +11,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'gridviz',
         'USER': environ['DB_USER'],
-        'PASSWORD': environ['DB_PASS']
+        'PASSWORD': environ['DB_PASS'],
+        'HOST': environ['DB_HOST']
     }
 }
 
