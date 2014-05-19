@@ -1,0 +1,8 @@
+# Copyright (c) 2014 Kevin Bell. All rights reserved.
+# See the file LICENSE.txt for copying permission.
+
+---
+gridviz_root: /opt/gridviz
+db_user: root
+db_pass: ''
+db_host: localhost

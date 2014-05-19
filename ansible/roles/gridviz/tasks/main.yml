@@ -10,7 +10,10 @@
     django_env:
       GRIDVIZ_HOSTNAME:
         "{{ hostvars[inventory_hostname]['ansible_ec2_public_hostname'] }}"
-      DJANGO_SETTINGS_MODULE: gridviz.settings.dev_uwsgi
+      DJANGO_SETTINGS_MODULE: gridviz.settings.prod
+      DB_USER: "{{ db_user }}"
+      DB_PASS: "{{ db_pass }}"
+      DJANGO_SECRET_KEY: "{{ django_secret_key }}"
 - name: ensure required packages installed
   apt: name={{ item }} state=present
   with_items:
