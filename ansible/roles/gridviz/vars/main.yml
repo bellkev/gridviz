@@ -7,4 +7,4 @@ db_user: root
 db_pass: ''
 db_host: localhost
 django_secret_key: abc
-django_settings: prod
+django_settings: gridviz.settings.prod
