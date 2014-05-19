@@ -10,7 +10,7 @@
     django_env:
       GRIDVIZ_HOSTNAME:
         "{{ hostvars[inventory_hostname]['ansible_ec2_public_hostname'] }}"
-      DJANGO_SETTINGS_MODULE: gridviz.settings.prod
+      DJANGO_SETTINGS_MODULE: "{{ django_settings }}"
       DB_USER: "{{ db_user }}"
       DB_PASS: "{{ db_pass }}"
       DB_HOST: "{{ db_host }}"
@@ -48,7 +48,7 @@
     login_user: "{{ db_user }}"
     login_password: "{{ db_pass }}"
 - name: run django migrations and collectstatic
-  django_manage: app_path=/opt/gridviz/django command={{ item }} settings=gridviz.settings.dev_uwsgi
+  django_manage: app_path=/opt/gridviz/django command={{ item }} settings={{ django_settings }}
   environment: django_env
   with_items:
     - migrate
