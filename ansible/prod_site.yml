@@ -13,9 +13,26 @@
     group: ssh-http
     region: us-west-2
     azs: us-west-2a,us-west-2b,us-west-2c
+    db_user: test_user
+    db_pass: test_pass
+    gridviz_root: /opt/gridviz
   tasks:
-  - fail: msg="The variable 'stack_name' must be specified as an extra var"
+  - name: validate input
+    fail: msg="The variable 'stack_name' must be specified as an extra var"
     when: stack_name is not defined
+  - name: ensure rds istance exists
+    rds:
+      instance_name: test-db
+      db_engine: MySQL
+      command: create
+      instance_type: db.t1.micro
+      region: us-west-2
+      username: "{{ db_user }}"
+      password: "{{ db_pass }}"
+      size: 5
+      db_name: gridviz
+      wait: yes
+    register: rds_data
   - name: lookup ami id
     ec2_ami_search: distro=ubuntu region={{ region }} release=trusty
     register: ubuntu_image
@@ -37,8 +54,10 @@
         git clone https://github.com/bellkev/gridviz.git {{ gridviz_root }}
         printf "[local]\nlocalhost\n" > /opt/local
         mkdir /etc/ansible
-        printf "[defaults]\nlog_path = /var/log/ansible.log\n" > /etc/ansible/ansible.cfg
-        ansible-playbook {{ gridviz_root }}/ansible/bootstrap.yml -i /opt/local
+        printf "[defaults]\nlog_path = /var/log/ansible.log\n" \
+          > /etc/ansible/ansible.cfg
+        ansible-playbook {{ gridviz_root }}/ansible/bootstrap.yml -i /opt/local \
+          -e "db_user={{ db_user }} db_pass={{ db_pass }} db_host={{ rds_data.instance.endpoint }} gridviz_root={{ gridviz_root }}"
   - name: ensure asg exists
     ec2_asg:
       name: "{{ stack_name }}_asg"

@@ -5,9 +5,11 @@
   ec2_facts:
 - name: create derived facts based on ec2 facts
   set_fact:
-    gridviz_hostname:  "{{ hostvars[inventory_hostname]['ansible_ec2_public_hostname'] }}"
+    gridviz_hostname:
+      "{{ hostvars[inventory_hostname]['ansible_ec2_public_hostname'] }}"
     django_env:
-      GRIDVIZ_HOSTNAME: "{{ hostvars[inventory_hostname]['ansible_ec2_public_hostname'] }}"
+      GRIDVIZ_HOSTNAME:
+        "{{ hostvars[inventory_hostname]['ansible_ec2_public_hostname'] }}"
       DJANGO_SETTINGS_MODULE: gridviz.settings.dev_uwsgi
 - name: ensure required packages installed
   apt: name={{ item }} state=present
@@ -36,6 +38,9 @@
   command: grunt less chdir=/opt/gridviz
 - name: ensure database exists
   mysql_db: name=gridviz state=present
+  login_host: "{{ db_host }}"
+  login_user: "{{ db_user }}"
+  login_password: "{{ db_pass }}"
 - name: run django migrations and collectstatic
   django_manage: app_path=/opt/gridviz/django command={{ item }} settings=gridviz.settings.dev_uwsgi
   environment: django_env
