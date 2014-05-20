@@ -71,7 +71,7 @@
     ec2_asg:
       name: "{{ stack_name }}-asg"
       launch_config_name: "{{ stack_name }}-lc"
-      load_balancers: "{{ stack_name}}-lb"
+      load_balancers: "{{ stack_name}}-elb"
       min_size: 1
       max_size: 1
       region: "{{ region }}"
