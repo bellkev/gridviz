@@ -8,11 +8,11 @@
     all_hostnames: >
       {{ hostvars[inventory_hostname]['ansible_ec2_public_hostname'] }},
       {{ hostvars[inventory_hostname]['ansible_ec2_local_ipv4'] }},
-      {{ extra_hostnames | default('') }}"
+      {{ extra_hostnames | default('') }}
 - name: determine django environment variables
   set_fact:
     django_env:
-      ALLOWED_HOSTS: all_hostnames
+      ALLOWED_HOSTS: "{{ all_hostnames }}"
       DJANGO_SETTINGS_MODULE: "{{ django_settings }}"
       DB_USER: "{{ db_user }}"
       DB_PASS: "{{ db_pass }}"
