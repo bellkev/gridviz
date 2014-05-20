@@ -67,7 +67,7 @@
         printf "[defaults]\nlog_path = /var/log/ansible.log\n" \
           > /etc/ansible/ansible.cfg
         ansible-playbook {{ gridviz_root }}/ansible/bootstrap.yml -i /opt/local \
-          -e "db_user={{ db_user }} db_pass={{ db_pass }} db_host={{ rds_data.instance.endpoint }} gridviz_root={{ gridviz_root }} django_secret_key={{ django_secret_key }} extra_hosts={{ elb_data.elb.dns_name }},{{ domain_name }}"
+          -e "db_user={{ db_user }} db_pass={{ db_pass }} db_host={{ rds_data.instance.endpoint }} gridviz_root={{ gridviz_root }} django_secret_key={{ django_secret_key }} extra_hostnames={{ elb_data.elb.dns_name }},{{ domain_name }}"
   - name: ensure asg exists
     ec2_asg:
       name: "{{ stack_name }}-asg"

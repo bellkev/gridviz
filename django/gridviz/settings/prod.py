@@ -20,4 +20,4 @@ STATIC_URL = '/static/'
 
 SECRET_KEY = environ['DJANGO_SECRET_KEY']
 
-ALLOWED_HOSTS = environ['ALLOWED_HOSTS'].split(',')
+ALLOWED_HOSTS = [host.strip() for host in environ['ALLOWED_HOSTS'].split(',')]
