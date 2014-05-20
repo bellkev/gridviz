@@ -29,7 +29,6 @@
         unhealthy_threshold: 2
         healthy_threshold: 10
     register: elb_data
-  - debug: var=elb_data
   - name: ensure rds instance exists
     rds:
       instance_name: "{{ stack_name }}-db"
