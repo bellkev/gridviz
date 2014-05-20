@@ -28,7 +28,7 @@
         interval: 30 # seconds
         unhealthy_threshold: 2
         healthy_threshold: 10
-  - name: ensure rds istance exists
+  - name: ensure rds instance exists
     rds:
       instance_name: "{{ stack_name }}-db"
       db_engine: MySQL
