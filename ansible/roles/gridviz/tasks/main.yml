@@ -3,7 +3,6 @@
 
 - name: gather facts based on ec2 metadata
   ec2_facts:
-- debug: var=hostvars[inventory_hostname]
 - name: determine all allowed host names
   set_fact:
     all_hostnames: >
