@@ -28,6 +28,8 @@
         interval: 30 # seconds
         unhealthy_threshold: 2
         healthy_threshold: 10
+    register: elb_data
+  - debug: var=elb_data
   - name: ensure rds instance exists
     rds:
       instance_name: "{{ stack_name }}-db"
@@ -52,7 +54,7 @@
       region: "{{ region }}"
       image_id: "{{ ubuntu_image.ami }}"
       key_name: "{{ keypair }}"
-      security_groups: "{{ group }}"
+      security_groups: "{{ security_group }}"
       instance_type: "{{ instance_type }}"
       instance_profile_name: "{{ role }}"
       user_data: |
@@ -66,7 +68,7 @@
         printf "[defaults]\nlog_path = /var/log/ansible.log\n" \
           > /etc/ansible/ansible.cfg
         ansible-playbook {{ gridviz_root }}/ansible/bootstrap.yml -i /opt/local \
-          -e "db_user={{ db_user }} db_pass={{ db_pass }} db_host={{ rds_data.instance.endpoint }} gridviz_root={{ gridviz_root }} django_secret_key={{ django_secret_key }}"
+          -e "db_user={{ db_user }} db_pass={{ db_pass }} db_host={{ rds_data.instance.endpoint }} gridviz_root={{ gridviz_root }} django_secret_key={{ django_secret_key }} extra_hosts={{ elb_data.elb.dns_name }},{{ domain_name }}"
   - name: ensure asg exists
     ec2_asg:
       name: "{{ stack_name }}-asg"

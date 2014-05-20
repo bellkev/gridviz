@@ -20,4 +20,4 @@ STATIC_URL = '/static/'
 
 SECRET_KEY = environ['DJANGO_SECRET_KEY']
 
-ALLOWED_HOSTS = [environ['GRIDVIZ_HOSTNAME']]
+ALLOWED_HOSTS = environ['ALLOWED_HOSTS'].split(',')

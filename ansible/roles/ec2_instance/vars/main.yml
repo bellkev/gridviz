@@ -1,9 +1,0 @@
-# Copyright (c) 2014 Kevin Bell. All rights reserved.
-# See the file LICENSE.txt for copying permission.
-
----
-keypair: aws-key-2
-instance_type: t1.micro
-security_group: ssh-http
-region: us-west-2
-count_tags: { "Name": "{{ instance_name }}" }

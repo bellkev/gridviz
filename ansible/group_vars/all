@@ -4,7 +4,7 @@
 role: gridviz-app-server
 keypair: aws-key-2
 instance_type: t1.micro
-group: ssh-http
+security_group: ssh-http
 region: us-west-2
 azs: us-west-2a,us-west-2b,us-west-2c
 db_user: test_user
@@ -12,3 +12,4 @@ db_pass: test_pass
 django_secret_key: abc
 gridviz_root: /opt/gridviz
 version: snapshot
+domain_name: gridviz.com
