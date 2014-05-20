@@ -6,24 +6,31 @@
   hosts: localhost
   connection: local
   gather_facts: False
-  vars:
-    role: gridviz-app-server
-    keypair: aws-key-2
-    instance_type: t1.micro
-    group: ssh-http
-    region: us-west-2
-    azs: us-west-2a,us-west-2b,us-west-2c
-    db_user: test_user
-    db_pass: test_pass
-    django_secret_key: abc
-    gridviz_root: /opt/gridviz
   tasks:
   - name: validate input
     fail: msg="The variable 'stack_name' must be specified as an extra var"
     when: stack_name is not defined
+  - name: ensure elb exists
+    ec2_elb_lb:
+      name: "{{ stack_name }}-elb"
+      region: "{{ region }}"
+      state: present
+      zones: "{{ azs }}"   
+      listeners:
+        - protocol: http
+          load_balancer_port: 80
+          instance_port: 8000
+      health_check:
+        ping_protocol: http
+        ping_port: 8000
+        ping_path: "/accounts/login/"
+        response_timeout: 5 # seconds
+        interval: 30 # seconds
+        unhealthy_threshold: 2
+        healthy_threshold: 10
   - name: ensure rds istance exists
     rds:
-      instance_name: test-db
+      instance_name: "{{ stack_name }}-db"
       db_engine: MySQL
       command: create
       instance_type: db.t1.micro
@@ -33,6 +40,7 @@
       size: 5
       db_name: gridviz
       wait: yes
+      wait_timeout: 1200 # seconds
     register: rds_data
   - name: lookup ami id
     ec2_ami_search: distro=ubuntu region={{ region }} release=trusty
@@ -40,7 +48,7 @@
   # Note that launch configs cannot be updated -- only created or deleted
   - name: ensure launch config exists
     ec2_lc:
-      name: "{{ stack_name }}_lc"
+      name: "{{ stack_name }}-lc"
       region: "{{ region }}"
       image_id: "{{ ubuntu_image.ami }}"
       key_name: "{{ keypair }}"
@@ -61,8 +69,9 @@
           -e "db_user={{ db_user }} db_pass={{ db_pass }} db_host={{ rds_data.instance.endpoint }} gridviz_root={{ gridviz_root }} django_secret_key={{ django_secret_key }}"
   - name: ensure asg exists
     ec2_asg:
-      name: "{{ stack_name }}_asg"
-      launch_config_name: "{{ stack_name }}_lc"
+      name: "{{ stack_name }}-asg"
+      launch_config_name: "{{ stack_name }}-lc"
+      load_balancers: "{{ stack_name}}-lb"
       min_size: 1
       max_size: 1
       region: "{{ region }}"

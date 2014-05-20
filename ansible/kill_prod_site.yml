@@ -1,0 +1,31 @@
+# Copyright (c) 2014 Kevin Bell. All rights reserved.
+# See the file LICENSE.txt for copying permission.
+
+---
+- hosts: localhost
+  connection: local
+  gather_facts: False
+  tasks:
+  - name: validate input
+    fail: msg="The variable 'stack_name' must be specified as an extra var"
+    when: stack_name is not defined
+  - name: kill rds instance
+    rds:
+      instance_name: "{{ stack_name }}-db"
+      command: delete
+      region: "{{ region }}"
+  - name: kill asg
+    ec2_asg:
+      name: "{{ stack_name }}-asg"
+      region: "{{ region }}"
+      state: absent
+  - name: kill launch config
+    ec2_lc:
+      name: "{{ stack_name }}-lc-{{ version }}"
+      region: "{{ region }}"
+      state: absent
+  - name: kill elb
+    ec2_elb_lb:
+      name: "{{ stack_name }}-elb"
+      region: "{{ region }}"
+      state: absent
