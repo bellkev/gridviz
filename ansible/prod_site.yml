@@ -49,7 +49,7 @@
   # Note that launch configs cannot be updated -- only created or deleted
   - name: ensure launch config exists
     ec2_lc:
-      name: "{{ stack_name }}-lc"
+      name: "{{ stack_name }}-lc-{{ version }}"
       region: "{{ region }}"
       image_id: "{{ ubuntu_image.ami }}"
       key_name: "{{ keypair }}"
@@ -71,7 +71,7 @@
   - name: ensure asg exists
     ec2_asg:
       name: "{{ stack_name }}-asg"
-      launch_config_name: "{{ stack_name }}-lc"
+      launch_config_name: "{{ stack_name }}-lc-{{ version }}"
       load_balancers: "{{ stack_name}}-elb"
       min_size: 1
       max_size: 1
