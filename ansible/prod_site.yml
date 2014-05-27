@@ -78,3 +78,4 @@
       region: "{{ region }}"
       availability_zones: "{{ azs }}"
       state: present
+

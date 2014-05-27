@@ -29,3 +29,6 @@
       name: "{{ stack_name }}-elb"
       region: "{{ region }}"
       state: absent
+  - name: check browser test result if present
+    fail: msg="Browser tests failed" 
+    when: browser_test_result is defined and browser_test_result.rc

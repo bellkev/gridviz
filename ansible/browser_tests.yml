@@ -1,0 +1,20 @@
+# Copyright (c) 2014 Kevin Bell. All rights reserved.
+# See the file LICENSE.txt for copying permission.
+
+---
+- name: run browser tests
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  tasks:
+    - name: wait for site to be available
+      uri: url=http://{{ elb_data.elb.dns_name }}/accounts/login status_code=502,503,504,200
+      register: result
+      until: result.status == 200
+      delay: 10
+      retries: 120
+    - name: run browser tests
+      shell: casperjs test ../browser_tests/tests.js --start=http://{{ elb_data.elb.dns_name }}
+      ignore_errors: yes
+      register: browser_test_result
+

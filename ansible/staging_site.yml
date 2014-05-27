@@ -1,0 +1,7 @@
+# Copyright (c) 2014 Kevin Bell. All rights reserved.
+# See the file LICENSE.txt for copying permission.
+
+---
+- include: prod_site.yml
+- include: browser_tests.yml
+- include: kill_prod_site.yml
