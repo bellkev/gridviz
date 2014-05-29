@@ -15,3 +15,7 @@
 *.pyc
 .coverage
 db.sqlite3
+
+# Vim swap files
+*.swp
+*.swo
