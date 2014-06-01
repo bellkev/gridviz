@@ -63,12 +63,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-STATICFILES_DIRS = (
-    join(SYSTEM_ROOT, 'static'),
-    join(SYSTEM_ROOT, 'bower_components'),
-    join(SYSTEM_ROOT, 'angular'),
-)
-
 STATIC_ROOT = join(SYSTEM_ROOT, 'collected_static')
 
 TEMPLATE_CONTEXT_PROCESSORS = (

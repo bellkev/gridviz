@@ -3,7 +3,7 @@
 *.iml
 
 # Generated static files
-/static/
+/compiled_static_dev/
 /collected_static/
 
 # Node/Angular/JS stuff
