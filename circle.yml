@@ -1,4 +1,10 @@
 ---
+# Custom dependencies
+dependencies:
+  pre:
+    - npm install -g karma-cli bower
+    - npm install
+    - bower install
 # Custom tests
 test:
   override:
