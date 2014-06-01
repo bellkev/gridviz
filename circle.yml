@@ -1,0 +1,7 @@
+---
+# Custom tests
+test:
+  override:
+    - python python_scripts/run_coverage.py run --rcfile=django/.coveragerc django/manage.py test drawings sql_svg_store
+    - karma start angular/karma-coverage.conf.js --single-run
+
