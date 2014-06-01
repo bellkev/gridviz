@@ -1,0 +1,41 @@
+[
+{
+    "fields": {
+        "name": "rect"
+    },
+    "model": "sql_svg_store.svgelementtype",
+    "pk": 1
+},
+{
+    "fields": {
+        "name": "x",
+        "data_type": 0
+    },
+    "model": "sql_svg_store.svgattribute",
+    "pk": 2
+},
+{
+    "fields": {
+        "name": "y",
+        "data_type": 0
+    },
+    "model": "sql_svg_store.svgattribute",
+    "pk": 3
+},
+{
+    "fields": {
+        "name": "width",
+        "data_type": 0
+    },
+    "model": "sql_svg_store.svgattribute",
+    "pk": 4
+},
+{
+    "fields": {
+        "name": "height",
+        "data_type": 0
+    },
+    "model": "sql_svg_store.svgattribute",
+    "pk": 5
+}
+]
