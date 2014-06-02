@@ -143,7 +143,7 @@
                 "LaunchConfigurationName": {
                     "Ref": "LC"
                 },
-                "HealthCheckGracePeriod": "900",
+                "HealthCheckGracePeriod": "1200",
                 "HealthCheckType": "ELB",
                 "AvailabilityZones": {
                     "Fn::GetAZs": ""
