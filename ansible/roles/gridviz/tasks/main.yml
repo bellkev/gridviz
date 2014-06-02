@@ -57,7 +57,7 @@
     app_path: /opt/gridviz/django
     command: loaddata
     settings: "{{ django_settings }}"
-    fixtures: sql_svg_data /opt/users.json
+    fixtures: svg_data.json /opt/users.json
   environment: django_env
 - name: run django migrations and collectstatic
   django_manage: 
