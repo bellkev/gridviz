@@ -1,0 +1,15 @@
+# Copyright (c) 2014 Kevin Bell. All rights reserved.
+# See the file LICENSE.txt for copying permission.
+
+---
+- name: create an autoscaling group based on a launch configuration
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  pre_tasks:
+  - name: validate input
+    fail: msg="The variable 'stack_name' must be specified as an extra var"
+    when: stack_name is not defined
+  roles:
+    - prod_stack
+
