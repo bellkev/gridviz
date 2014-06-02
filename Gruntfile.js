@@ -10,7 +10,8 @@ module.exports = function (grunt) {
         copy: {
             main: {
                 files: [
-                    {expand: true, src: ['img/*'], dest: 'compiled_static_dev/'}
+                    {expand: true, src: ['img/*'], dest: 'compiled_static_dev/'},
+                    {expand: true, cwd: 'bower_components/bootstrap/', src: ['fonts/*'], dest: 'compiled_static_dev/'}
                 ],
             }
         },
