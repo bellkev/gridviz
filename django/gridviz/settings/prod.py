@@ -27,3 +27,5 @@ STATICFILES_DIRS = (
 SECRET_KEY = environ['DJANGO_SECRET_KEY']
 
 ALLOWED_HOSTS = [host.strip() for host in environ['ALLOWED_HOSTS'].split(',')]
+
+FIXTURE_DIRS = ('/opt/fixtures',)

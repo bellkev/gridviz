@@ -30,8 +30,6 @@
       add_host: hostname={{ ec2_info.tagged_instances[0].public_dns_name }} groupname=ec2_hosts
     - name: wait for instances to listen on port 22
       wait_for: state=started host={{ ec2_info.tagged_instances[0].public_dns_name }} port=22
-    - name: record endpoint
-      shell: printf "{{ ec2_info.tagged_instances[0].public_dns_name }}" > dev_site_endpoint
 
 - name: ensure that the complete app is installed on the instance
   hosts: ec2_hosts

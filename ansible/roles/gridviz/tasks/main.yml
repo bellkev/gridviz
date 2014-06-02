@@ -50,8 +50,20 @@
     login_host: "{{ db_host }}"
     login_user: "{{ db_user }}"
     login_password: "{{ db_pass }}"
+- name: ensure django fixtures in place
+  template: src=users.json dest=/opt/users.json
+- name: ensure django fixtures loaded
+  django_manage: 
+    app_path: /opt/gridviz/django
+    command: loaddata
+    settings: "{{ django_settings }}"
+    fixtures: sql_svg_data /opt/users.json
+  environment: django_env
 - name: run django migrations and collectstatic
-  django_manage: app_path=/opt/gridviz/django command={{ item }} settings={{ django_settings }}
+  django_manage: 
+    app_path: /opt/gridviz/django
+    command: "{{ item }}"
+    settings: "{{ django_settings }}"
   environment: django_env
   with_items:
     - migrate

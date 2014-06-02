@@ -10,3 +10,6 @@ db_pass: ''
 db_host: localhost
 django_secret_key: abc
 django_settings: gridviz.settings.prod
+test_user_name: test_user
+# hash of 'test_pass'
+test_user_pass_hash: pbkdf2_sha256$12000$owLs5ku6ehds$D1cLHNvolG/sCoqnOSWFedgakaVM2hIGNimfImOXRQM=
