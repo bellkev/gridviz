@@ -42,7 +42,7 @@
 - name: ensure npm packages installed
   command: npm install chdir=/opt/gridviz
 - name: ensure less compiled
-  command: grunt less chdir=/opt/gridviz
+  command: grunt chdir=/opt/gridviz
 - name: ensure database exists
   mysql_db:
     name: gridviz

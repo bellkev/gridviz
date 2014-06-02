@@ -1,0 +1,21 @@
+# Copyright (c) 2014 Kevin Bell. All rights reserved.
+# See the file LICENSE.txt for copying permission.
+
+---
+- name: lookup ami id
+  ec2_ami_search: distro=ubuntu region={{ region }} release=trusty
+  register: ubuntu_image
+- name: launch the cloudformation template
+  cloudformation:
+    stack_name: "{{ stack_name }}"
+    state: present
+    region: "{{ region }}"
+    template: roles/prod_stack/files/template.json
+    template_parameters:
+      KeyName: "{{ keypair }}"
+      InstanceType: "{{ instance_type }}"
+      AMI: "{{ ubuntu_image.ami }}"
+      SecurityGroup: "{{ security_group }}"
+      DatabaseUser: "{{ db_user }}"
+      DatabasePass: "{{ db_pass }}"
+      DjangoSecretKey: "{{ django_secret_key }}"

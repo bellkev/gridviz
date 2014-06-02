@@ -1,0 +1,179 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Parameters": {
+        "AMI": {
+            "Description": "AMI ID to use for the LC",
+            "Type": "String"
+        },
+        "DatabaseUser": {
+            "Description": "Master DB user",
+            "Type": "String"
+        },
+        "DatabasePass": {
+            "NoEcho": true,
+            "Description": "Master DB password",
+            "Type": "String"
+        },
+        "DatabaseInstanceType": {
+            "Description": "RDS instance type",
+            "Type": "String",
+            "Default": "db.t1.micro"
+        },
+        "DjangoSecretKey": {
+            "NoEcho": true,
+            "Description": "Top secret",
+            "Type": "String"
+        },
+        "DomainName": {
+            "Description": "Public site domain name",
+            "Type": "String",
+            "Default": "gridviz.com"
+        },
+        "InstanceType": {
+            "Description": "WebServer EC2 instance type",
+            "Type": "String",
+            "Default": "t1.micro"
+        },
+        "InstanceCount": {
+            "Description": "Number of instances to maintain in ASG",
+            "Type": "Number",
+            "Default": 1
+        },
+        "KeyName": {
+            "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instances",
+            "Type": "String"
+        },
+        "SecurityGroup": {
+            "Description": "Security group to use for server instances",
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "DB": {
+            "Type": "AWS::RDS::DBInstance",
+            "Properties": {
+                "Engine": "MySQL",
+                "EngineVersion": "5.6",
+                "MasterUsername": {
+                    "Ref": "DatabaseUser"
+                },
+                "MasterUserPassword": {
+                    "Ref": "DatabasePass"
+                },
+                "DBInstanceClass": {
+                    "Ref": "DatabaseInstanceType"
+                },
+                "AllocatedStorage": 5,
+                "MultiAZ": false
+            }
+        },
+        "ELB": {
+            "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+            "Properties": {
+                "AvailabilityZones": {
+                    "Fn::GetAZs": ""
+                },
+                "Listeners": [
+                    {
+                        "InstanceProtocol": "HTTP",
+                        "InstancePort": "8000",
+                        "Protocol": "HTTP",
+                        "LoadBalancerPort": "80"
+                    }
+                ],
+                "HealthCheck": {
+                    "Timeout": "5",
+                    "Interval": "30",
+                    "HealthyThreshold": "2",
+                    "UnhealthyThreshold": "5",
+                    "Target": "HTTP:8000/accounts/login/"
+                }
+            }
+        },
+        "LC": {
+            "Type": "AWS::AutoScaling::LaunchConfiguration",
+            "DependsOn": ["DB", "ELB"],
+            "Properties": {
+                "ImageId": {
+                    "Ref": "AMI"
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                },
+                "IamInstanceProfile": "gridviz-app-server",
+                "SecurityGroups": [
+                    {
+                        "Ref": "SecurityGroup"
+                    }
+                ],
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": ["", [
+                            "#!/bin/bash\n",
+                            "apt-get install -y git python-setuptools python-dev\n",
+                            "git clone -b personal https://github.com/bellkev/ansible.git /opt/ansible\n",
+                            "(cd /opt/ansible && python setup.py install)\n",
+                            "git clone https://github.com/bellkev/gridviz.git /opt/gridviz\n",
+                            "printf '[local]\\nlocalhost\\n' > /opt/local\n",
+                            "mkdir /etc/ansible\n",
+                            "printf '[defaults]\\nlog_path = /var/log/ansible.log\\n' ",
+                            "> /etc/ansible/ansible.cfg\n",
+                            "ansible-playbook /opt/gridviz/ansible/bootstrap.yml -i /opt/local",
+                            " -e db_user=", {"Ref": "DatabaseUser"},
+                            " -e db_pass=", {"Ref": "DatabasePass"},
+                            " -e db_host=", {"Fn::GetAtt": ["DB", "Endpoint.Address"]},
+                            " -e django_secret_key=", {"Ref": "DjangoSecretKey"},
+                            " -e extra_hostnames=", {"Fn::GetAtt": ["ELB", "DNSName"]}, ",", {"Ref": "DomainName"}, "\n"
+                        ]]
+                    }
+                }
+            }
+        },
+        "ASG": {
+            "Type": "AWS::AutoScaling::AutoScalingGroup",
+            "Properties": {
+                "LoadBalancerNames": [
+                    {
+                        "Ref": "ELB"
+                    }
+                ],
+                "LaunchConfigurationName": {
+                    "Ref": "LC"
+                },
+                "HealthCheckGracePeriod": "1200",
+                "HealthCheckType": "ELB",
+                "AvailabilityZones": {
+                    "Fn::GetAZs": ""
+                },
+                "MinSize": {
+                    "Ref": "InstanceCount"
+                },
+                "MaxSize": {
+                    "Ref": "InstanceCount"
+                },
+                "DesiredCapacity": {
+                    "Ref": "InstanceCount"
+                }
+            },
+            "UpdatePolicy": {
+                "AutoScalingRollingUpdate": {
+                    "MinInstancesInService": "0",
+                    "MaxBatchSize": "1",
+                    "PauseTime": "PT5M"
+                }
+            }
+        }
+    },
+    "Outputs": {
+        "SiteEndpoint": {
+            "Value": {
+                "Fn::GetAtt": ["ELB", "DNSName"]
+            },
+            "Description": "LB endpoint"
+        }
+    }
+}
+

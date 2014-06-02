@@ -12,4 +12,3 @@ db_pass: test_pass
 django_secret_key: abc
 gridviz_root: /opt/gridviz
 version: snapshot
-domain_name: gridviz.com
