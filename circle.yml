@@ -2,6 +2,7 @@
 # Custom dependencies
 dependencies:
   pre:
+    - pip install -r requirements.txt --find-links=http://gridviz-wheelhouse.s3-website-us-west-2.amazonaws.com
     - npm install -g karma-cli bower
     - npm install
     - bower install

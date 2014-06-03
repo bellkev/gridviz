@@ -5,7 +5,7 @@ language: python
 python:
   - 2.7
 install:
-  - pip install -r requirements.txt
+  - pip install -r requirements.txt --find-links=http://gridviz-wheelhouse.s3-website-us-west-2.amazonaws.com
   - npm install -g karma-cli bower
   - npm install
   - bower install
