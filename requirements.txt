@@ -1,14 +1,15 @@
 # Copyright (c) 2014 Kevin Bell. All rights reserved.
 # See the file LICENSE.txt for copying permission.
 
--e git+https://github.com/django/django@549b65824184711823e6a8c38ccf7365f10023d8#egg=django
+Django==1.7b4
 django-websocket-redis==0.4.0
 django-bootstrap-form==3.1
 django-model-utils==2.0.3
 coverage==3.7.1
 coveralls==0.4.1
 PyMySQL==0.6.1
--e git://github.com/bellkev/django-registration@bf9f9408fe7955dbfea4da32795f7d64ba955190#egg=django-registration
+django-registration
 boto==2.27.0
 django-ses==0.6.0
 django-braces==1.4.0
+
