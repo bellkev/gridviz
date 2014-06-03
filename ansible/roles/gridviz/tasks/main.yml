@@ -23,7 +23,6 @@
   with_items:
     - git
     - python-pip
-    - python-dev
     - nodejs
     - npm
 - name: ensure nodejs available as node
@@ -31,7 +30,9 @@
 - name: checkout repo
   git: repo=https://github.com/bellkev/gridviz.git dest=/opt/gridviz
 - name: ensure pip packages installed
-  pip: requirements=/opt/gridviz/requirements.txt
+  pip:
+    requirements: /opt/gridviz/requirements.txt
+    extra_args: --find-links=http://gridviz-wheelhouse.s3-website-us-west-2.amazonaws.com
 - name: ensure bower and grunt available
   npm: global=yes name={{ item }}
   with_items:
@@ -50,15 +51,6 @@
     login_host: "{{ db_host }}"
     login_user: "{{ db_user }}"
     login_password: "{{ db_pass }}"
-- name: ensure django fixtures in place
-  template: src=users.json dest=/opt/users.json
-- name: ensure django fixtures loaded
-  django_manage: 
-    app_path: /opt/gridviz/django
-    command: loaddata
-    settings: "{{ django_settings }}"
-    fixtures: svg_data.json /opt/users.json
-  environment: django_env
 - name: run django migrations and collectstatic
   django_manage: 
     app_path: /opt/gridviz/django
@@ -68,24 +60,22 @@
   with_items:
     - migrate
     - collectstatic
+- name: ensure django fixtures in place
+  template: src=users.json dest=/opt/users.json
+- name: ensure django fixtures loaded
+  django_manage: 
+    app_path: /opt/gridviz/django
+    command: loaddata
+    settings: "{{ django_settings }}"
+    fixtures: svg_data.json /opt/users.json
+  environment: django_env
 # This task needs to use template because ini_file can't handle uwsgi's duplicate keys
 - name: ensure uwsgi config file in place
-  template: src=uwsgi_dev.ini dest=/etc/uwsgi/apps-available
-- name: ensure uwsgi app enabled
-  file: src=/etc/uwsgi/apps-available/uwsgi_dev.ini dest=/etc/uwsgi/apps-enabled/uwsgi_dev.ini state=link
+  template: src=uwsgi_dev.ini dest=/etc/uwsgi/
 - name: ensure nginx config file in place
   template: src=nginx_dev.conf dest=/etc/nginx/sites-available
 - name: ensure nginx site enabled
   file: src=/etc/nginx/sites-available/nginx_dev.conf dest=/etc/nginx/sites-enabled/nginx_dev.conf state=link
-# The following is necessary for uwsgi because it appears not to be running in emperor
-# mode in the debian distribution init.d script
-- name: check if uwsgi app already exists
-  command: "[ -d /run/uwsgi/app/uwsgi_dev ]"
-  ignore_errors: yes
-  register: uwsgi_run_result
-- name: ensure uwsgi restarted
-  service: name=uwsgi state=restarted
-  when: uwsgi_run_result.rc
 - name: ensure services reloaded
   service: name={{ item }} state=reloaded
   with_items:
